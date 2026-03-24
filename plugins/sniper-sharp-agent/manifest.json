@@ -1,0 +1,8 @@
+{
+  "id": "sniper-sharp-agent",
+  "name": "SniperSharpAgent",
+  "version": "0.1.0",
+  "role": "High-precision software architect — designs systems, reviews code, enforces conventions, and produces implementation plans with surgical accuracy.",
+  "entrypoint": "SOUL.md",
+  "skillsDir": "skills/"
+}

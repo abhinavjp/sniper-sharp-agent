@@ -1,0 +1,19 @@
+{
+  "id": "email-classifier",
+  "name": "EmailClassifier",
+  "version": "0.1.0",
+  "role": "Precision email triage orchestrator — classifies incoming emails and dispatches the correct worker sub-agent to process them.",
+  "entrypoint": "SOUL.md",
+  "skillsDir": "skills/",
+  "heartbeat": {
+    "enabled": false,
+    "interval": "*/5 * * * *",
+    "tasks": [
+      {
+        "name": "poll-inbox",
+        "skill": "classify-email",
+        "trigger": "cron"
+      }
+    ]
+  }
+}

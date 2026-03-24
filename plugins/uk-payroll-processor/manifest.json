@@ -1,0 +1,8 @@
+{
+  "id": "uk-payroll-processor",
+  "name": "UkPayrollProcessor",
+  "version": "0.1.0",
+  "role": "Worker sub-agent — executes UK Payroll API calls for starter processing, timesheet importing, and task creation. Returns strict JSON only.",
+  "entrypoint": "SOUL.md",
+  "skillsDir": "skills/"
+}

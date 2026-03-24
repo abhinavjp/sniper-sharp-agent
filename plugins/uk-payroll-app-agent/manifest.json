@@ -1,0 +1,8 @@
+{
+  "id": "uk-payroll-app-agent",
+  "name": "UkPayrollAppAgent",
+  "version": "0.1.0",
+  "role": "Standalone UI assistance agent — helps users navigate and understand the UK Payroll App using RAG-indexed documentation and live MCP screen context.",
+  "entrypoint": "SOUL.md",
+  "skillsDir": "skills/"
+}

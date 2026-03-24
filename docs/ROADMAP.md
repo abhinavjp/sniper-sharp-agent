@@ -26,15 +26,15 @@
 - [x] Produce: docs/MEMORY_AND_LOOP_DEEP_DIVE.md
 
 ## Phase 3 — Project Scaffold
-- [ ] Create plugin manifest schema and loader
-- [ ] Create base SOUL.md template (generalist defaults, plugin-overridable)
-- [ ] Create AGENTS.md (base operating rules)
-- [ ] Create HEARTBEAT.md (proactive scheduling config)
-- [ ] Scaffold .agents/skills/ directory with core skills (read_file, http_call, bash)
-- [ ] Scaffold plugins/ directory with plugin spec and example structure
-- [ ] Scaffold memory/ directory with shared and per-user structure
-- [ ] Scaffold .agents/subagents/ directory with orchestrator and worker definitions
-- [ ] Produce: docs/ARCHITECTURE.md (living architecture doc)
+- [x] Create plugin manifest schema and loader
+- [x] Create base SOUL.md template (generalist defaults, plugin-overridable)
+- [x] Create AGENTS.md (base operating rules)
+- [x] Create HEARTBEAT.md (proactive scheduling config)
+- [x] Scaffold .agents/skills/ directory with core skills (read-file, http-call, bash-exec)
+- [x] Scaffold plugins/ directory with all 4 plugins (email-classifier, uk-payroll-processor, uk-payroll-app-agent, sniper-sharp-agent)
+- [x] Scaffold memory/ directory with shared and per-user structure
+- [x] Scaffold .agents/subagents/ directory (placeholder — populated in Phase 4)
+- [x] Produce: docs/ARCHITECTURE.md (living architecture doc)
 
 ## Phase 4 — Sub-Agent Orchestration Implementation
 - [ ] Implement orchestrator agent definition

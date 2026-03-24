@@ -22,10 +22,14 @@ Skills are defined using YAML frontmatter to support static analysis without par
 
 ## 4. Identity Transformation via Plugin
 A plugin fundamentally rewires the agent. By attaching a plugin, the agent's core system prompt is mutated at runtime:
-- **Name/Role**: "You are a generalist assistant" is overridden by "You are SniperSharpAgent, precision engineer."
-- **Operating Context**: Adds domain rules (e.g. "Never use Tailwind, strictly vanilla CSS").
-- **Tool Roster**: Injects new function schemas into the tool-calling API layer.
+- **Name/Role**: "You are a generalist assistant" is overridden by the plugin's SOUL — e.g. "You are EmailClassifier, a precision email triage agent."
+- **Operating Context**: Adds domain rules specific to the plugin's purpose.
+- **Tool Roster**: Injects new function schemas (skills) into the tool-calling layer.
 The base agent binary remains untouched; the runtime memory represents the fusion of the core + plugin context.
+
+**This applies to workers too.** When an orchestrator spawns a sub-agent, it spawns a fresh base agent
+and attaches the appropriate plugin. The worker's identity, rules, and skills all come from that plugin —
+not from the orchestrator, and not from any hardcoded worker definition.
 
 ## 5. Skill Scope Hierarchy
 Skills exist in tiered boundaries, preventing collisions and enabling overrides:
@@ -36,7 +40,8 @@ Skills exist in tiered boundaries, preventing collisions and enabling overrides:
 If a Project and Bundled skill conflict, the narrower scope (Project/Plugin) shadows the generic one.
 
 ## 6. Replication Design
-For this framework, the equivalent plugin mechanism will be implemented as follows:
-- **Manifest Format**: A standard `plugin.json` (or `plugin.yaml`) containing the plugin's `id`, `displayName`, `roleDescription`, and references to its skill directory.
-- **Context Injection**: The plugin must supply an equivalent of OpenClaw's `SOUL.md`. When the base agent initializes, it checks if a plugin is specified. If found, it swaps out default context for the plugin's `SOUL.md`.
-- **Runtime Transition**: The framework's initialization phase reads the active plugin. It traverses the plugin's `skills/` directory, compiles the YAML frontmatter across all `.md` files, and constructs the agent's tool payload strictly constrained to that plugin's specialized intents.
+For this framework, the plugin mechanism is implemented as follows:
+- **Manifest Format**: `manifest.json` (JSON, not YAML — YAML is reserved for declarative agent definitions). Contains `id` (kebab-case), `name` (PascalCase), `version` (semver), `role`, `entrypoint`, and `skillsDir`. See `docs/CONVENTIONS.md` §4.1 for the full schema.
+- **Context Injection**: The plugin supplies a `SOUL.md`. When the base agent initialises, it checks for a plugin. If found, it swaps out the default generalist context for the plugin's `SOUL.md`.
+- **Runtime Transition**: The framework's initialisation phase reads the active plugin. It traverses the plugin's `skills/` directory, compiles the YAML frontmatter from all `SKILL.md` files, and constructs the agent's tool payload constrained to that plugin's specialised intents (progressive disclosure — names only at boot, full schema on demand).
+- **Worker Sub-Agents**: The same mechanism applies when the orchestrator spawns a worker. It spawns a base agent, attaches the designated plugin (specified in the `.agents/subagents/{name}.yaml` definition), binds the user memory context, and injects the task as a structured JSON prompt.

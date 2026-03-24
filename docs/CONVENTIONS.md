@@ -84,6 +84,15 @@ src/               ← TypeScript runtime source
   "skillsDir": "skills/"
 }
 ```
+
+**Known plugin IDs in this project:**
+
+| `id` | `name` | Role |
+|---|---|---|
+| `email-classifier` | `EmailClassifier` | Orchestrates email triage and dispatches worker sub-agents |
+| `uk-payroll-processor` | `UkPayrollProcessor` | Worker — executes UK Payroll API calls |
+| `uk-payroll-app-agent` | `UkPayrollAppAgent` | Standalone — app navigation assistant via RAG and MCP |
+| `sniper-sharp-agent` | `SniperSharpAgent` | High-precision software architect |
 - `id` must be unique across all plugins
 - `version` must be a valid semver string
 - `entrypoint` must point to a file that exists within the plugin directory
@@ -115,9 +124,14 @@ scope: core | plugin | user    # Informational; resolved at load time from direc
 
 ### 4.3 Sub-Agent Definition (`.agents/subagents/{name}.yaml`)
 
+> **Key principle**: A worker sub-agent is a base agent with a plugin attached — the same
+> pattern as any other agent. The `plugin` field below specifies which plugin is attached
+> when the orchestrator spawns this worker.
+
 ```yaml
 name: agent-name-kebab-case
 description: "One sentence: when the orchestrator should dispatch this worker."
+plugin: plugin-id-kebab-case       # Plugin to attach when spawning this worker
 system_prompt: |
   You are a specialist worker. [Full persona and task instructions here.]
   IMPORTANT: Return ONLY valid JSON. No preamble. No explanation. No markdown wrapping.
@@ -137,6 +151,7 @@ output_contract:
 ```
 
 - Every sub-agent MUST include `output_contract`
+- Every sub-agent MUST include `plugin` — the worker's identity comes from the plugin, never from `system_prompt` alone
 - `system_prompt` MUST end with the no-preamble JSON-only directive
 - `allowed_tools` must be a strict subset of the parent orchestrator's permissions
 

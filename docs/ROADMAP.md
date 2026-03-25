@@ -36,13 +36,17 @@
 - [x] Scaffold .agents/subagents/ directory (placeholder — populated in Phase 4)
 - [x] Produce: docs/ARCHITECTURE.md (living architecture doc)
 
-## Phase 4 — Sub-Agent Orchestration Implementation
-- [ ] Implement orchestrator agent definition
-- [ ] Implement parallel dispatch rules (routing logic in CLAUDE.md/GEMINI.md)
-- [ ] Implement sequential chaining pattern
-- [ ] Implement output contract enforcement for worker sub-agents
-- [ ] Implement result synthesis pattern
-- [ ] Test with a multi-domain parallel task
+## Phase 4 — Sub-Agent Orchestration + AI Provider Abstraction
+- [x] Abstract AI provider interface (src/types/ai-provider.ts) — supports 5 provider types
+- [x] Implement AnthropicSetupAuthProvider using @anthropic-ai/sdk + Claude CLI OAuth token
+- [x] Stub providers: anthropic-api-key, openai-api-key, openai-codex-oauth, ollama
+- [x] Provider factory (src/providers/index.ts)
+- [x] Tool executor (src/core/tool-executor.ts) — leaf tools + progressive-disclosure plugin skills
+- [x] Agent loop (src/core/agent-loop.ts) — multi-turn Messages API loop with tool use
+- [x] Orchestrator (src/core/orchestrator.ts) — parallel + sequential sub-agent dispatch
+- [x] Sub-agent definition: .agents/subagents/uk-payroll-processor-worker.yaml
+- [x] Entry point (src/index.ts) — interactive REPL + single-message mode
+- [x] Build verified: npm install && tsc --noEmit passes cleanly
 - [ ] Produce: docs/SUBAGENT_IMPLEMENTATION.md
 
 ## Phase 5 — Multi-User Memory Implementation

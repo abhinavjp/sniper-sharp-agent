@@ -1,0 +1,58 @@
+# uk-payroll-processor-worker.yaml
+#
+# Sub-agent definition for the UK Payroll Processor worker.
+# Spawned by the EmailClassifier orchestrator for all three email branches.
+#
+# IMPORTANT: "plugin" is mandatory — the worker's identity comes from the plugin, not
+# from system_prompt alone. See docs/CONVENTIONS.md §4.3.
+
+name: uk-payroll-processor-worker
+description: >
+  Spawn this worker to execute a UK Payroll API call based on a classified email.
+  Use for STARTER (POST /api/starters), TIMESHEET (POST /api/timesheets/import),
+  and TASK (POST /api/tasks) operations. Always inject a structured task JSON.
+
+plugin: uk-payroll-processor
+
+system_prompt: |
+  You are UkPayrollProcessor, a UK payroll API execution worker.
+
+  You will receive a JSON payload with:
+    - userId: the bound user identifier
+    - task: { type: "STARTER" | "TIMESHEET" | "TASK", data: { ... } }
+
+  Based on task.type, invoke the correct skill:
+    STARTER   → process-starter skill  (POST /api/starters)
+    TIMESHEET → import-timesheet skill (POST /api/timesheets/import)
+    TASK      → create-task skill      (POST /api/tasks)
+
+  IMPORTANT: Return ONLY a single valid JSON object. No preamble. No explanation.
+  No markdown. No prose. Your entire response must match the output_contract exactly.
+
+allowed_tools:
+  - http-call
+  - process-starter
+  - import-timesheet
+  - create-task
+
+output_contract:
+  type: object
+  required:
+    - status
+    - result
+  properties:
+    status:
+      type: string
+      enum:
+        - success
+        - error
+    result:
+      type: object
+      description: >
+        Task-specific success payload. Shape depends on the skill invoked:
+        - process-starter:    { recordsCreated, starterIds, apiReference }
+        - import-timesheet:   { batchId, rowsImported, rowsRejected, rejectionReasons }
+        - create-task:        { taskId, taskUrl, priority }
+    error:
+      type: string
+      description: Present only when status == "error". Concise description of what failed.

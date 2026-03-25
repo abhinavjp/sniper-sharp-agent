@@ -35,7 +35,7 @@ export interface PluginManifest {
 export interface HeartbeatConfig {
   enabled: boolean;
 
-  /** Cron expression (UTC). e.g. "*/5 * * * *" */
+  /** Cron expression in UTC. Example: every 5 minutes = star-slash-5 star star star star */
   interval: string;
 
   tasks: HeartbeatTask[];

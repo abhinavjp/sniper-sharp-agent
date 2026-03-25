@@ -154,12 +154,20 @@ export interface OutputContractProperty {
 // Agent Request Context  (passed to every agent on each request)
 // ---------------------------------------------------------------------------
 
+export interface ConversationTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface AgentRequestContext {
   /** Bound user identifier. Required. Never constructed by agent reasoning. */
   userId: string;
 
   /** Incoming message or structured task payload. */
   input: string | Record<string, unknown>;
+
+  /** Prior conversation turns to prepend, enabling multi-turn sessions. */
+  history?: ConversationTurn[];
 
   /** If this agent is a worker, the task type (matches skill name convention). */
   taskType?: string;

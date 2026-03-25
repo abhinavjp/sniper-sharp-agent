@@ -72,7 +72,13 @@ export class AgentLoop {
     const tools = this.buildToolDefinitions(skillRoster);
     const toolExecutor = new ToolExecutor(skillRoster);
 
+    const historyMessages: ProviderMessage[] = (context.history ?? []).map((turn) => ({
+      role: turn.role,
+      content: turn.content,
+    }));
+
     const messages: ProviderMessage[] = [
+      ...historyMessages,
       {
         role: 'user',
         content: typeof context.input === 'string'

@@ -1,1 +1,59 @@
-references/openclaw/*
+# ─── Dependencies ────────────────────────────────────────────
+node_modules/
+
+# ─── Build output ────────────────────────────────────────────
+dist/
+build/
+out/
+*.js.map
+
+# ─── TypeScript ──────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Environment & Secrets ───────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# ─── Logs ────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+
+# ─── OS ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── Editors ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Reference material (read-only, never commit) ────────────
+references/
+
+# ─── Memory (per-user, ephemeral) ────────────────────────────
+memory/users/
+
+# ─── Framework credentials / runtime state ───────────────────
+# Claude CLI credentials are read at runtime — never committed
+.claude/credentials.json
+
+# ─── Test artefacts ──────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ─── Python ──────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env_python/

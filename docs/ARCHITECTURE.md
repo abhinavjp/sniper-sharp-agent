@@ -3,9 +3,11 @@
 This document describes the current implemented state of the framework.
 It is updated at the end of each phase. For design intent, see `PROPOSED_ARCHITECTURE.md`.
 For diagrams, see `PROPOSED_ARCHITECTURE_DIAGRAM.md` and `SYSTEM_OVERVIEW_DIAGRAM.md`.
+For the Python backend design spec, see `docs/superpowers/specs/2026-03-27-langgraph-backend-design.md`.
 
-**Last updated**: Phase 3 — Project Scaffold
-**Status**: Scaffold complete. No runtime logic implemented yet. Phases 4–10 implement each layer.
+**Last updated**: Phase 4 — Sub-Agent Orchestration + AI Provider Abstraction (TypeScript prototype)
+**Architecture pivot (2026-03-27)**: Python `backend/` is now the primary runtime using LangGraph + FastAPI + SQLite + ChromaDB. The TypeScript `src/` scaffold is a design reference only.
+**Status**: TypeScript prototype complete (Phase 4). Python backend implementation begins Phase 5.
 
 ---
 
@@ -129,20 +131,25 @@ Directory tree created. Per-user directories (`memory/users/{userId}/`) are crea
 
 ---
 
-## What Is Not Yet Implemented
+## What Is Not Yet Implemented (Python Backend)
 
-| Component | Phase |
-|---|---|
-| Sub-agent definition YAML files | Phase 4 |
-| Orchestrator routing logic | Phase 4 |
-| Runtime agent loop (request → classify → spawn → synthesise) | Phase 4 |
-| Per-user memory creation and routing | Phase 5 |
-| Session memory compaction | Phase 5 |
-| Email classifier skill implementations | Phase 6 |
-| UK Payroll API calls (all 3 skills) | Phase 7 |
-| RAG store indexing and MCP server | Phase 8 |
-| SniperSharpAgent skill implementations | Phase 9 |
-| Integration tests | Phase 10 |
+> The TypeScript prototype (`src/`) fully implemented the items below as a design reference.
+> The Python backend (`backend/`) now implements them with LangGraph. See `docs/ROADMAP.md` Phases 5–10.
+
+| Component | Phase | Python implementation |
+|---|---|---|
+| DB models + Alembic migrations | Phase 5 | SQLAlchemy ORM, SQLite |
+| Provider factory (all 6 types) | Phase 5 | LangChain provider classes |
+| Config CRUD API | Phase 5 | FastAPI routes |
+| LangGraph supervisor graph | Phase 6 | StateGraph + conditional edges |
+| Specialist subgraphs | Phase 6 | create_react_agent per agent |
+| Graph hot-reload registry | Phase 6 | GraphRegistry.rebuild() |
+| Chat route wired to graph | Phase 6 | POST /api/chat |
+| Memory system (ChromaDB + SQLite) | Phase 7 | MemoryManager + PromptInjector |
+| Skill executor + built-in skills | Phase 7 | SkillRegistry, http_call, save/read_memory |
+| Agent seeding + email pipeline | Phase 8 | EmailClassifier, PayrollWorker, AppAgent |
+| Config hook mechanism | Phase 9 | hooks/config_hook.py |
+| Integration + load tests | Phase 10 | docs/TESTING.md |
 
 ---
 

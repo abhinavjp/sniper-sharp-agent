@@ -1,5 +1,16 @@
 # Proposed Architecture
 
+> **Note (2026-03-27):** This document describes the original TypeScript-based design intent.
+> The runtime implementation has pivoted to Python (LangGraph + FastAPI + SQLite + ChromaDB).
+> For the authoritative implementation design, see:
+> `docs/superpowers/specs/2026-03-27-langgraph-backend-design.md`
+>
+> Concepts documented here (plugin identity, skill scope hierarchy, progressive disclosure,
+> worker-as-base-agent, multi-user memory isolation) remain architecturally valid and are
+> carried forward into the Python implementation.
+
+---
+
 ## 1. Plugin System Design
 
 The framework defaults to a capable generalist but transitions into a specialist upon plugin initialisation.

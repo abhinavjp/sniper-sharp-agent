@@ -29,3 +29,4 @@ def client():
         yield c
     app.dependency_overrides.clear()
     Base.metadata.drop_all(bind=engine)
+    engine.dispose()

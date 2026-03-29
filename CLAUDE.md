@@ -8,7 +8,7 @@ A generic, plugin-driven agent framework. The base agent has no hardcoded name o
 
 **Planned plugins**: `email-classifier` (email triage orchestrator), `uk-payroll-processor` (UK Payroll API worker), `uk-payroll-app-agent` (app navigation assistant), `sniper-sharp-agent` (software architect).
 
-**Current status:** Phases 1–6 complete. A working FastAPI + LangGraph backend lives in `backend/`. 58 tests passing. **Next: Phase 7 — Memory System** (ChromaDB RAG, memory CRUD, prompt injection). See `docs/ROADMAP.md` for full status.
+**Current status:** Phases 1–6 complete. A working FastAPI + LangGraph backend lives in `backend/` with 58 tests passing. A React UI scaffold lives in `ui/` (Phase UI-1 is the next frontend work). **Next backend: Phase 7 — Memory System.** See `docs/ROADMAP.md` for full status.
 
 ## Design Principles
 
@@ -17,6 +17,39 @@ A generic, plugin-driven agent framework. The base agent has no hardcoded name o
 - Sub-agent orchestration is first-class: parallel and sequential task dispatch via an Orchestrator/Worker pattern
 - Progressive skill disclosure: YAML frontmatter-driven markdown skills, loaded on demand
 - Skill scope hierarchy (higher tiers shadow lower): **Core → Plugin → User**
+
+## Active Frontend (React — ui/)
+
+The `ui/` directory is the React frontend. Stack: **React 19 + Vite + TypeScript + Tailwind CSS 4**.
+
+```
+ui/
+  index.html
+  src/
+    main.tsx             # React entry point
+    App.tsx              # Currently: a single provider-config form (182 lines)
+    index.css            # Tailwind base + body styles
+    App.css              # Component styles
+    assets/              # Static images
+```
+
+**UI completion status (vs 27 backend endpoints):**
+
+| Area | Backend endpoints | UI status |
+|---|---|---|
+| Providers | 5 (CRUD) | ~10% — form exists but calls `/api/config` (wrong endpoint) |
+| Agents | 7 (CRUD + skill attach/detach) | 0% |
+| Skills | 5 (CRUD) | 0% |
+| Routing Rules | 5 (CRUD) | 0% |
+| Sessions | 2 (create / delete) | 0% |
+| **Chat** | 1 (`POST /api/chat`) | 0% |
+| System / health | 3 (health, status, rebuild) | 0% |
+
+**What exists:** The visual design language is established (dark glassmorphism, indigo/blue palette, rounded cards). Reuse the Tailwind patterns from `App.tsx` everywhere.
+
+**What is missing:** Navigation/routing, API client layer, chat view, all CRUD management views, system dashboard. No `react-router-dom` installed yet.
+
+**Plan:** `docs/superpowers/plans/` — see the Phase UI plan files once created.
 
 ## Active Backend (Python — primary runtime)
 

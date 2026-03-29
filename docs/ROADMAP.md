@@ -82,6 +82,46 @@
 - [x] Wire `POST /api/chat` to run the compiled graph; persist history to sessions table
 - [x] **58 tests passing** — graph state, skills registry, and chat API fully covered
 
+---
+> **Frontend track** — Phases UI-1 to UI-4 below run in parallel with the backend phases.
+> The `ui/` directory has a React 19 + Vite + TypeScript + Tailwind scaffold. The visual design
+> language (dark glassmorphism, indigo/blue palette) is established in `App.tsx` and must be
+> kept consistent. **Start here for frontend work.**
+
+## Phase UI-1 — Foundation, API Client + Chat
+
+*Prerequisite: Phase 6 backend complete (POST /api/chat live).*
+
+- [ ] Install `react-router-dom` in `ui/`
+- [ ] Create `ui/src/api/client.ts` — typed fetch wrappers for all 27 backend endpoints
+- [ ] Scaffold top-level routing: `ChatView`, `ConfigView`, `SystemView` (sidebar nav)
+- [ ] Fix provider form: wire it to `POST /api/providers` (currently calls non-existent `/api/config`)
+- [ ] Build `ChatView`: session selector/creator, message thread, send box, intent badge
+- [ ] `POST /api/sessions` to create a session; `POST /api/chat` for messages
+- [ ] Persist `session_id` in component state; display `turn_count` and `intent` from response
+
+## Phase UI-2 — Provider + Agent Management
+
+- [ ] `ProvidersView`: list all providers (GET /api/providers), create form, edit inline, delete
+- [ ] `AgentsView`: list agents (GET /api/agents), create/edit form with provider picker, delete
+- [ ] Skill attachment panel on AgentView: list attached skills, attach/detach buttons
+- [ ] Supervisor badge on agent cards (visual distinction for is_supervisor=true)
+
+## Phase UI-3 — Skills + Routing Rules
+
+- [ ] `SkillsView`: list all skills, create/edit form with Python code textarea (implementation field), delete
+- [ ] `RoutingRulesView`: list rules ordered by priority, create/edit form, delete
+- [ ] Priority drag-to-reorder (optional) or numeric priority input
+
+## Phase UI-4 — System Dashboard + Graph Controls
+
+- [ ] `SystemView`: poll `GET /api/health` every 10 s — show `graph_compiled` indicator
+- [ ] Display `GET /api/graph/status` counts (agents, skills, routing rules)
+- [ ] "Rebuild Graph" button — `POST /api/graph/rebuild`
+- [ ] Toast/notification on rebuild success or failure
+
+---
+
 ## Phase 7 — Memory System
 
 - [ ] Implement `memory/chroma.py` — ChromaDB embedded client wrapper

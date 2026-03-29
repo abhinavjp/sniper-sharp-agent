@@ -88,17 +88,19 @@
 > language (dark glassmorphism, indigo/blue palette) is established in `App.tsx` and must be
 > kept consistent. **Start here for frontend work.**
 
-## Phase UI-1 — Foundation, API Client + Chat
+## Phase UI-1 — Foundation, API Client + Chat ✅
 
 *Prerequisite: Phase 6 backend complete (POST /api/chat live).*
 
-- [ ] Install `react-router-dom` in `ui/`
-- [ ] Create `ui/src/api/client.ts` — typed fetch wrappers for all 27 backend endpoints
-- [ ] Scaffold top-level routing: `ChatView`, `ConfigView`, `SystemView` (sidebar nav)
-- [ ] Fix provider form: wire it to `POST /api/providers` (currently calls non-existent `/api/config`)
-- [ ] Build `ChatView`: session selector/creator, message thread, send box, intent badge
-- [ ] `POST /api/sessions` to create a session; `POST /api/chat` for messages
-- [ ] Persist `session_id` in component state; display `turn_count` and `intent` from response
+- [x] Install `react-router-dom` in `ui/`
+- [x] Create `ui/src/api/client.ts` — typed fetch wrappers for all 27 backend endpoints
+- [x] Scaffold top-level routing with sidebar nav: Chat, Providers, Agents, Skills, Routing Rules, System
+- [x] Fix provider form: wired to `POST /api/providers` with correct schema (was calling non-existent `/api/config`)
+- [x] Build `ProvidersView`: list providers, create form (all 6 provider types), delete
+- [x] Build `ChatView`: agent selector, session creator, message thread, send box, intent badge
+- [x] `POST /api/sessions` to create a session; `POST /api/chat` for messages
+- [x] Persist `session_id` in component state; display `turn_count` and `intent` from response
+- [x] Sidebar polls `GET /api/health` every 10 s — shows live `graph_compiled` status dot
 
 ## Phase UI-2 — Provider + Agent Management
 

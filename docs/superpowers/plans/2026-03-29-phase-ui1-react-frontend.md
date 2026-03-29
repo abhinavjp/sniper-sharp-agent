@@ -36,7 +36,7 @@
 - Create: `ui/src/api/client.ts`
 - Modify: `ui/vite.config.ts`
 
-- [ ] **Step 1: Update `ui/vite.config.ts`**
+- [x] **Step 1: Update `ui/vite.config.ts`**
 
 Read the file first, then overwrite entirely:
 
@@ -57,7 +57,7 @@ export default defineConfig({
 })
 ```
 
-- [ ] **Step 2: Install react-router-dom**
+- [x] **Step 2: Install react-router-dom**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent/ui
@@ -66,7 +66,7 @@ npm install react-router-dom
 
 Expected: `react-router-dom` appears in `dependencies` in `package.json`. No errors.
 
-- [ ] **Step 3: Create `ui/src/api/client.ts`**
+- [x] **Step 3: Create `ui/src/api/client.ts`**
 
 ```typescript
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -291,7 +291,7 @@ export const api = {
 };
 ```
 
-- [ ] **Step 4: Verify build**
+- [x] **Step 4: Verify build**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent/ui
@@ -300,7 +300,7 @@ npm run build
 
 Expected: Build succeeds, no TypeScript errors. Exported symbols are never "unused" from the compiler's perspective.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent
@@ -323,7 +323,7 @@ git commit -m "feat(ui): typed API client for all 27 backend endpoints + Vite /a
 - Create: `ui/src/views/SystemView.tsx` (stub)
 - Modify: `ui/src/App.tsx`
 
-- [ ] **Step 1: Create `ui/src/components/Sidebar.tsx`**
+- [x] **Step 1: Create `ui/src/components/Sidebar.tsx`**
 
 ```tsx
 import { NavLink } from 'react-router-dom';
@@ -404,7 +404,7 @@ export default function Sidebar() {
 }
 ```
 
-- [ ] **Step 2: Create `ui/src/components/Layout.tsx`**
+- [x] **Step 2: Create `ui/src/components/Layout.tsx`**
 
 ```tsx
 import { Outlet } from 'react-router-dom';
@@ -422,7 +422,7 @@ export default function Layout() {
 }
 ```
 
-- [ ] **Step 3: Create stub views**
+- [x] **Step 3: Create stub views**
 
 Create each file below exactly as shown.
 
@@ -510,7 +510,7 @@ export default function SystemView() {
 }
 ```
 
-- [ ] **Step 4: Replace `ui/src/App.tsx`**
+- [x] **Step 4: Replace `ui/src/App.tsx`**
 
 Read the file first, then overwrite:
 
@@ -544,7 +544,7 @@ export default function App() {
 
 Note: `App.css` is no longer imported — leave the file in place, it has no effect.
 
-- [ ] **Step 5: Verify build**
+- [x] **Step 5: Verify build**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent/ui
@@ -553,7 +553,7 @@ npm run build
 
 Expected: Build succeeds, no TypeScript errors.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent
@@ -571,7 +571,7 @@ git commit -m "feat(ui): routing scaffold — Layout, Sidebar with health badge,
 **Files:**
 - Modify: `ui/src/views/ProvidersView.tsx` (replace stub)
 
-- [ ] **Step 1: Replace `ui/src/views/ProvidersView.tsx`**
+- [x] **Step 1: Replace `ui/src/views/ProvidersView.tsx`**
 
 Read the stub first, then overwrite:
 
@@ -779,7 +779,7 @@ export default function ProvidersView() {
 }
 ```
 
-- [ ] **Step 2: Verify build**
+- [x] **Step 2: Verify build**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent/ui
@@ -788,7 +788,7 @@ npm run build
 
 Expected: Build succeeds, no TypeScript errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent
@@ -803,7 +803,7 @@ git commit -m "feat(ui): ProvidersView — list + create + delete wired to /api/
 **Files:**
 - Modify: `ui/src/views/ChatView.tsx` (replace stub)
 
-- [ ] **Step 1: Replace `ui/src/views/ChatView.tsx`**
+- [x] **Step 1: Replace `ui/src/views/ChatView.tsx`**
 
 Read the stub first, then overwrite:
 
@@ -988,7 +988,7 @@ export default function ChatView() {
 }
 ```
 
-- [ ] **Step 2: Verify build**
+- [x] **Step 2: Verify build**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent/ui
@@ -997,7 +997,7 @@ npm run build
 
 Expected: Build succeeds, no TypeScript errors.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd D:/Projects/sniper-sharp-agent

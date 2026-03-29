@@ -8,7 +8,7 @@ A generic, plugin-driven agent framework. The base agent has no hardcoded name o
 
 **Planned plugins**: `email-classifier` (email triage orchestrator), `uk-payroll-processor` (UK Payroll API worker), `uk-payroll-app-agent` (app navigation assistant), `sniper-sharp-agent` (software architect).
 
-**Current status:** Phases 1–6 complete. A working FastAPI + LangGraph backend lives in `backend/` with 58 tests passing. A React UI scaffold lives in `ui/` (Phase UI-1 is the next frontend work). **Next backend: Phase 7 — Memory System.** See `docs/ROADMAP.md` for full status.
+**Current status:** Phases 1–6 and UI-1 complete. FastAPI + LangGraph backend (`backend/`, 58 tests). React frontend (`ui/`) has working chat, provider management, sidebar nav, and health badge. **Next backend: Phase 7 — Memory System. Next frontend: Phase UI-2 — AgentsView.** See `docs/ROADMAP.md` for full status.
 
 ## Design Principles
 
@@ -37,19 +37,17 @@ ui/
 
 | Area | Backend endpoints | UI status |
 |---|---|---|
-| Providers | 5 (CRUD) | ~10% — form exists but calls `/api/config` (wrong endpoint) |
-| Agents | 7 (CRUD + skill attach/detach) | 0% |
-| Skills | 5 (CRUD) | 0% |
-| Routing Rules | 5 (CRUD) | 0% |
-| Sessions | 2 (create / delete) | 0% |
-| **Chat** | 1 (`POST /api/chat`) | 0% |
-| System / health | 3 (health, status, rebuild) | 0% |
+| Providers | 5 (CRUD) | ✅ List + create + delete (`ProvidersView`) |
+| **Chat** | 1 (`POST /api/chat`) | ✅ Full chat UI (`ChatView`) |
+| Sessions | 2 (create / delete) | ✅ New Session button in ChatView |
+| System / health | 3 (health, status, rebuild) | 🟡 Health dot in sidebar; full view is Phase UI-4 |
+| Agents | 7 (CRUD + skill attach/detach) | ⬜ Stub — Phase UI-2 |
+| Skills | 5 (CRUD) | ⬜ Stub — Phase UI-3 |
+| Routing Rules | 5 (CRUD) | ⬜ Stub — Phase UI-3 |
 
-**What exists:** The visual design language is established (dark glassmorphism, indigo/blue palette, rounded cards). Reuse the Tailwind patterns from `App.tsx` everywhere.
+**What exists:** `ui/src/api/client.ts` covers all 27 endpoints. `Sidebar` + `Layout` with react-router-dom v7. `ChatView` (full), `ProvidersView` (full), four stubs.
 
-**What is missing:** Navigation/routing, API client layer, chat view, all CRUD management views, system dashboard. No `react-router-dom` installed yet.
-
-**Plan:** `docs/superpowers/plans/` — see the Phase UI plan files once created.
+**Plan:** `docs/superpowers/plans/2026-03-29-phase-ui1-react-frontend.md` (complete). UI-2/3/4 plans to be written.
 
 ## Active Backend (Python — primary runtime)
 

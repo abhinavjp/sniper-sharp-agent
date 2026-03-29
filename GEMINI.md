@@ -12,10 +12,13 @@ Plugins transform it into specialists. The first planned plugin is SniperSharpAg
 - Plugin-first: the framework is generic; plugins are what make it useful
 
 ## Current Phase
-**Phases 1–6 complete.** A working FastAPI + LangGraph backend lives in `backend/` with 58 passing tests. A React UI scaffold lives in `ui/` and needs to be built out.
+**Phases 1–6 and UI-1 complete.**
+
+- Backend (`backend/`): FastAPI + LangGraph, 58 tests passing, SQLite DB, 27 REST endpoints.
+- Frontend (`ui/`): React 19 + Vite + TypeScript + Tailwind. Working chat interface, provider management, sidebar nav with live health badge.
 
 **Next backend: Phase 7 — Memory System** (ChromaDB RAG, `memory/manager.py`, prompt injection, memory CRUD).
-**Next frontend: Phase UI-1 — Foundation + Chat** (API client, routing, chat view, provider management).
+**Next frontend: Phase UI-2 — AgentsView** (agent CRUD + skill attach/detach).
 
 See `docs/ROADMAP.md` for full phase-by-phase status.
 
@@ -88,8 +91,19 @@ Full rules in `docs/CONVENTIONS.md` — that file is authoritative. Summary of h
 - `plugins/` — plugin packages (scaffolded in Phase 3)
 - `memory/` — per-user and shared memory (structure scaffolded; RAG implementation is Phase 7)
 
-## UI Status
-The `ui/src/App.tsx` contains a single provider config form that calls `/api/config` (wrong endpoint — should be `/api/providers`). No routing, no API client, no chat view. Backend has 27 ready endpoints. See ROADMAP.md Phase UI-1 through UI-4 for the build-out plan.
+## UI Status (Phase UI-1 complete)
+
+| View | Route | Status |
+|---|---|---|
+| ChatView | `/` | ✅ Agent select, session, message thread, intent badges |
+| ProvidersView | `/providers` | ✅ List, create (all 6 types), delete |
+| Sidebar | always | ✅ Nav + live `graph_compiled` health dot (polls every 10 s) |
+| AgentsView | `/agents` | ⬜ Stub — Phase UI-2 |
+| SkillsView | `/skills` | ⬜ Stub — Phase UI-3 |
+| RoutingRulesView | `/routing-rules` | ⬜ Stub — Phase UI-3 |
+| SystemView | `/system` | ⬜ Stub — Phase UI-4 |
+
+`ui/src/api/client.ts` covers all 27 backend endpoints with full TypeScript types.
 
 ## Reference Material
 - `references/openclaw/` — OpenClaw source (git-ignored, read-only)

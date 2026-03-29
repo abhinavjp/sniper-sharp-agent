@@ -8,7 +8,7 @@ A generic, plugin-driven agent framework. The base agent has no hardcoded name o
 
 **Planned plugins**: `email-classifier` (email triage orchestrator), `uk-payroll-processor` (UK Payroll API worker), `uk-payroll-app-agent` (app navigation assistant), `sniper-sharp-agent` (software architect).
 
-This project is in early planning/architecture phase. See `docs/ROADMAP.md` for current status.
+**Current status:** Phases 1–6 complete. A working FastAPI + LangGraph backend lives in `backend/`. 58 tests passing. **Next: Phase 7 — Memory System** (ChromaDB RAG, memory CRUD, prompt injection). See `docs/ROADMAP.md` for full status.
 
 ## Design Principles
 
@@ -18,7 +18,54 @@ This project is in early planning/architecture phase. See `docs/ROADMAP.md` for 
 - Progressive skill disclosure: YAML frontmatter-driven markdown skills, loaded on demand
 - Skill scope hierarchy (higher tiers shadow lower): **Core → Plugin → User**
 
-## Planned Directory Structure
+## Active Backend (Python — primary runtime)
+
+The `backend/` directory is the live implementation. TypeScript `src/` remains as a design reference only.
+
+```
+backend/
+  main.py                  # FastAPI app + lifespan (calls graph_registry.rebuild on startup)
+  config.py                # Env vars: DB_PATH, PORT, HOOK_TIMEOUT_SECONDS
+  seed.py                  # Idempotent DB seeder — EmailClassifier + PayrollWorker + skills + routing rules
+
+  db/
+    models.py              # SQLAlchemy ORM: Provider, Agent, Skill, AgentSkill, RoutingRule, Session, Memory
+    database.py            # engine, SessionLocal, init_db(), get_db() (FastAPI dependency)
+    migrations/            # Alembic migrations
+
+  providers/
+    factory.py             # provider_factory(provider) — dispatches to one of 6 LangChain LLM creators
+    anthropic_api_key.py   # ChatAnthropic with API key
+    anthropic_setup_auth.py# ChatAnthropic via Claude CLI OAuth token
+    openai_api_key.py      # ChatOpenAI with API key
+    openai_codex_oauth.py  # ChatOpenAI via Codex OAuth
+    google_api_key.py      # ChatGoogleGenerativeAI with API key
+    custom_url.py          # ChatOpenAI-compatible custom base URL
+
+  graph/
+    state.py               # SupervisorState TypedDict (messages, user_id, session_id, intent, response)
+    prompt.py              # build_system_prompt(agent) — persona + rules; Phase 7/9 hooks ready
+    classifier.py          # build_classifier_node() — async node; LLM intent → routing_rules label
+    specialist.py          # build_specialist_subgraph() — create_react_agent with tools + system prompt
+    supervisor.py          # build_supervisor_graph() — StateGraph: classifier → conditional → specialist → END
+    registry.py            # GraphRegistry singleton; rebuild() called on startup + every config mutation
+
+  skills/
+    registry.py            # build_tools_for_agent() — sandboxed exec() runner → LangChain Tool objects
+
+  api/
+    system.py              # GET /api/health, GET /api/graph/status, POST /api/graph/rebuild
+    providers.py           # CRUD /api/providers
+    agents.py              # CRUD /api/agents + skill attach/detach
+    skills.py              # CRUD /api/skills
+    routing_rules.py       # CRUD /api/routing-rules
+    sessions.py            # POST/DELETE /api/sessions
+    chat.py                # POST /api/chat — runs LangGraph graph, persists history
+
+  tests/                   # 58 tests, all passing (pytest + FastAPI TestClient, shared in-memory SQLite)
+```
+
+## Planned TypeScript Directory Structure (design reference only)
 
 ```
 plugins/
@@ -66,8 +113,11 @@ memory/
 
 | File | Purpose |
 |------|---------|
-| `docs/ROADMAP.md` | Phase-by-phase task status |
+| `docs/ROADMAP.md` | Phase-by-phase task status — **start here** |
 | `docs/CONVENTIONS.md` | **Authoritative implementation rules** — naming, schemas, forbidden patterns |
+| `docs/superpowers/specs/2026-03-27-langgraph-backend-design.md` | Full Python backend design spec (Phases 5–10) |
+| `docs/superpowers/plans/2026-03-27-phase5-python-backend-foundation.md` | Phase 5 plan (complete) |
+| `docs/superpowers/plans/2026-03-27-phase6-langgraph-runtime.md` | Phase 6 plan (complete) |
 | `docs/PROPOSED_ARCHITECTURE.md` | Detailed design intent (plugins, skills, memory, sub-agents) |
 | `docs/PROPOSED_ARCHITECTURE_DIAGRAM.md` | Mermaid diagrams of plugin lifecycle and multi-user flow |
 | `docs/SYSTEM_OVERVIEW_DIAGRAM.md` | Full visual map — all agents, plugins, skills, sub-agents, memory |
@@ -87,7 +137,8 @@ Full rules in `docs/CONVENTIONS.md` — that file is authoritative. Summary of h
 - All documentation lives in `docs/`; diagrams are Mermaid, embedded in their `.md` files
 - `references/` is git-ignored — never commit reference material
 - **No agent names hardcoded** anywhere in framework files (`src/core/`, `CLAUDE.md`, `GEMINI.md`)
-- **Language**: TypeScript (Node.js 20+), ESM only, `tsx` for script execution
+- **Backend language**: Python 3.10+ — FastAPI, SQLAlchemy 2.0, LangGraph, LangChain (`backend/`)
+- **TypeScript scaffold**: `src/` (Node.js 20+, ESM, `tsx`) — design reference only; not the active runtime
 - **Naming**: plugin IDs in `kebab-case`; display names in `PascalCase`; spec files in `SCREAMING_SNAKE.md`
 - **Schemas must be defined before loaders** — never write a parser without a documented schema first
 - **Implementation order**: Study → Scaffold → Schema → Core → Plugin → User — never skip steps

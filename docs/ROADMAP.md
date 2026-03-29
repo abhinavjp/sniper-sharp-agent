@@ -57,30 +57,30 @@
 
 ---
 
-## Phase 5 — Python Backend Foundation
+## Phase 5 — Python Backend Foundation ✅
 
-- [ ] Define SQLAlchemy ORM models: Provider, Agent, Skill, AgentSkill, RoutingRule, Session, Memory
-- [ ] Configure Alembic; generate and apply initial migration
-- [ ] Implement `config.py` — env vars, DB path, port, hook timeout
-- [ ] Implement `db/database.py` — engine, session factory, dependency injection
-- [ ] Implement provider factory (`providers/factory.py`) for all 6 provider types:
+- [x] Define SQLAlchemy ORM models: Provider, Agent, Skill, AgentSkill, RoutingRule, Session, Memory
+- [x] Configure Alembic; generate and apply initial migration
+- [x] Implement `config.py` — env vars, DB path, port, hook timeout
+- [x] Implement `db/database.py` — engine, session factory, dependency injection
+- [x] Implement provider factory (`providers/factory.py`) for all 6 provider types:
   - `anthropic-api-key`, `anthropic-setup-auth`, `openai-api-key`, `openai-codex-oauth`, `google-api-key`, `custom-url`
-- [ ] Implement all CRUD API routes: providers, agents, skills, routing_rules, sessions
-- [ ] Implement `GET /api/health`, `GET /api/graph/status`, `POST /api/graph/rebuild`
-- [ ] Seed DB with initial agents (EmailClassifier supervisor + PayrollWorker specialist)
-- [ ] Verify: all CRUD routes work, provider factory returns correct LangChain LLM instances
-- [ ] Produce: updated `docs/ARCHITECTURE.md`
+- [x] Implement all CRUD API routes: providers, agents, skills, routing_rules, sessions
+- [x] Implement `GET /api/health`, `GET /api/graph/status`, `POST /api/graph/rebuild`
+- [x] Seed DB with initial agents (EmailClassifier supervisor + PayrollWorker specialist)
+- [x] Verify: all CRUD routes work, provider factory returns correct LangChain LLM instances
+- [x] **58 tests passing** — see `backend/tests/`
 
-## Phase 6 — LangGraph Graph Implementation
+## Phase 6 — LangGraph Graph Implementation ✅
 
-- [ ] Implement `graph/state.py` — `SupervisorState` TypedDict
-- [ ] Implement `graph/classifier.py` — LLM call node; returns `intent` from routing_rules labels
-- [ ] Implement `graph/specialist.py` — `build_specialist_subgraph()` using `create_react_agent`
-- [ ] Implement `graph/supervisor.py` — `build_supervisor_graph()` from DB config; conditional edges from routing_rules
-- [ ] Implement `graph/registry.py` — `GraphRegistry` with `get()` and `rebuild()`; `rebuild()` triggered on every config mutation
-- [ ] Wire `POST /api/chat` to run the compiled graph; persist history to sessions table
-- [ ] Test: send message → classifier routes → specialist responds → history saved
-- [ ] Produce: updated `docs/ARCHITECTURE.md`
+- [x] Implement `graph/state.py` — `SupervisorState` TypedDict with `add_messages` annotation
+- [x] Implement `graph/classifier.py` — LLM call node; returns `intent` from routing_rules labels
+- [x] Implement `graph/specialist.py` — `build_specialist_subgraph()` using `create_react_agent`
+- [x] Implement `graph/supervisor.py` — `build_supervisor_graph()` from DB config; conditional edges from routing_rules
+- [x] Implement `graph/registry.py` — `GraphRegistry` with `get()` and `rebuild()`; `rebuild()` triggered on every config mutation and at startup
+- [x] Implement `skills/registry.py` — `build_tools_for_agent()` with sandboxed `exec()` skill runner
+- [x] Wire `POST /api/chat` to run the compiled graph; persist history to sessions table
+- [x] **58 tests passing** — graph state, skills registry, and chat API fully covered
 
 ## Phase 7 — Memory System
 

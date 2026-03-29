@@ -39,7 +39,7 @@
 - Create: `backend/graph/state.py`
 - Create: `backend/tests/test_graph_state.py`
 
-- [ ] **Step 1: Write failing test `backend/tests/test_graph_state.py`**
+- [x] **Step 1: Write failing test `backend/tests/test_graph_state.py`**
 
 ```python
 from graph.state import SupervisorState
@@ -69,7 +69,7 @@ def test_supervisor_state_instantiates():
     assert state["intent"] is None
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 cd backend
@@ -78,7 +78,7 @@ pytest tests/test_graph_state.py -v
 
 Expected: `ModuleNotFoundError: No module named 'graph.state'`
 
-- [ ] **Step 3: Write `backend/graph/state.py`**
+- [x] **Step 3: Write `backend/graph/state.py`**
 
 ```python
 from typing import Annotated, TypedDict
@@ -95,7 +95,7 @@ class SupervisorState(TypedDict):
     response: str | None  # set by specialist subgraph; returned to caller
 ```
 
-- [ ] **Step 4: Run test — expect PASS**
+- [x] **Step 4: Run test — expect PASS**
 
 ```bash
 cd backend
@@ -108,7 +108,7 @@ PASSED tests/test_graph_state.py::test_supervisor_state_shape
 PASSED tests/test_graph_state.py::test_supervisor_state_instantiates
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 cd backend
@@ -125,7 +125,7 @@ git commit -m "feat(backend/graph): SupervisorState TypedDict with add_messages 
 - Create: `backend/skills/registry.py`
 - Create: `backend/tests/test_skills_registry.py`
 
-- [ ] **Step 1: Write failing test `backend/tests/test_skills_registry.py`**
+- [x] **Step 1: Write failing test `backend/tests/test_skills_registry.py`**
 
 ```python
 from unittest.mock import MagicMock
@@ -179,7 +179,7 @@ def test_tool_execution_error_returns_error_dict():
     assert "boom" in result["message"]
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 cd backend
@@ -188,9 +188,9 @@ pytest tests/test_skills_registry.py -v
 
 Expected: `ModuleNotFoundError: No module named 'skills'`
 
-- [ ] **Step 3: Create `backend/skills/__init__.py`** (empty file)
+- [x] **Step 3: Create `backend/skills/__init__.py`** (empty file)
 
-- [ ] **Step 4: Write `backend/skills/registry.py`**
+- [x] **Step 4: Write `backend/skills/registry.py`**
 
 ```python
 from typing import Any
@@ -275,7 +275,7 @@ def build_tools_for_agent(agent: Agent) -> list[Tool]:
     return tools
 ```
 
-- [ ] **Step 5: Run tests — expect PASS**
+- [x] **Step 5: Run tests — expect PASS**
 
 ```bash
 cd backend
@@ -290,7 +290,7 @@ PASSED tests/test_skills_registry.py::test_agent_with_no_skills_returns_empty_li
 PASSED tests/test_skills_registry.py::test_tool_execution_error_returns_error_dict
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd backend
@@ -305,7 +305,7 @@ git commit -m "feat(backend/skills): SkillRegistry — compile DB skill rows int
 **Files:**
 - Create: `backend/graph/prompt.py`
 
-- [ ] **Step 1: Write `backend/graph/prompt.py`**
+- [x] **Step 1: Write `backend/graph/prompt.py`**
 
 ```python
 from db.models import Agent
@@ -330,7 +330,7 @@ def build_system_prompt(agent: Agent) -> str:
     return "\n".join(sections)
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 cd backend
@@ -345,7 +345,7 @@ git commit -m "feat(backend/graph): prompt assembly — persona + rules (Phase 7
 **Files:**
 - Create: `backend/graph/specialist.py`
 
-- [ ] **Step 1: Write `backend/graph/specialist.py`**
+- [x] **Step 1: Write `backend/graph/specialist.py`**
 
 ```python
 from langchain_core.language_models import BaseChatModel
@@ -379,7 +379,7 @@ def build_specialist_subgraph(agent: Agent) -> CompiledGraph:
     )
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 cd backend
@@ -394,7 +394,7 @@ git commit -m "feat(backend/graph): specialist subgraph builder using create_rea
 **Files:**
 - Create: `backend/graph/classifier.py`
 
-- [ ] **Step 1: Write `backend/graph/classifier.py`**
+- [x] **Step 1: Write `backend/graph/classifier.py`**
 
 ```python
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -447,7 +447,7 @@ def build_classifier_node(supervisor: Agent, routing_rules: list[RoutingRule]):
     return classifier_node
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 cd backend
@@ -463,7 +463,7 @@ git commit -m "feat(backend/graph): classifier node — LLM intent detection fro
 - Create: `backend/graph/supervisor.py`
 - Modify: `backend/graph/registry.py` (replace stub)
 
-- [ ] **Step 1: Write `backend/graph/supervisor.py`**
+- [x] **Step 1: Write `backend/graph/supervisor.py`**
 
 ```python
 from typing import Any
@@ -526,7 +526,7 @@ def build_supervisor_graph(
     return graph.compile()
 ```
 
-- [ ] **Step 2: Replace `backend/graph/registry.py`**
+- [x] **Step 2: Replace `backend/graph/registry.py`**
 
 ```python
 import asyncio
@@ -589,7 +589,7 @@ class GraphRegistry:
 graph_registry = GraphRegistry()
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 cd backend
@@ -604,7 +604,7 @@ git commit -m "feat(backend/graph): supervisor graph builder + GraphRegistry wit
 **Files:**
 - Modify: `backend/main.py`
 
-- [ ] **Step 1: Update `backend/main.py` lifespan to call `rebuild()` on startup**
+- [x] **Step 1: Update `backend/main.py` lifespan to call `rebuild()` on startup**
 
 Replace the existing `lifespan` function:
 
@@ -658,7 +658,7 @@ app.include_router(routing_rules_router)
 app.include_router(sessions_router)
 ```
 
-- [ ] **Step 2: Verify server starts without error after seeding**
+- [x] **Step 2: Verify server starts without error after seeding**
 
 ```bash
 cd backend
@@ -674,7 +674,7 @@ curl -s http://localhost:8000/api/health | python -m json.tool
 
 Expected: `{"status": "ok", "graph_compiled": true}`
 
-- [ ] **Step 3: Run existing test suite — all must still pass**
+- [x] **Step 3: Run existing test suite — all must still pass**
 
 ```bash
 cd backend
@@ -683,7 +683,7 @@ pytest -v --tb=short
 
 Expected: All existing tests still PASS. (The `conftest.py` uses an in-memory DB with no agents, so `graph_compiled` will be false in tests — that is correct behaviour.)
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 cd backend
@@ -700,7 +700,7 @@ git commit -m "feat(backend): wire graph rebuild on startup — graph_compiled=t
 - Create: `backend/tests/test_api_chat.py`
 - Modify: `backend/main.py`
 
-- [ ] **Step 1: Write failing tests `backend/tests/test_api_chat.py`**
+- [x] **Step 1: Write failing tests `backend/tests/test_api_chat.py`**
 
 ```python
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -796,7 +796,7 @@ def test_chat_graph_not_compiled(client):
     assert "not ready" in resp.json()["detail"].lower()
 ```
 
-- [ ] **Step 2: Run test to confirm it fails**
+- [x] **Step 2: Run test to confirm it fails**
 
 ```bash
 cd backend
@@ -805,7 +805,7 @@ pytest tests/test_api_chat.py -v
 
 Expected: All tests fail (route not registered).
 
-- [ ] **Step 3: Write `backend/api/chat.py`**
+- [x] **Step 3: Write `backend/api/chat.py`**
 
 ```python
 from langchain_core.messages import HumanMessage
@@ -901,7 +901,7 @@ def _extract_last_ai_message(messages: list) -> str:
     return ""
 ```
 
-- [ ] **Step 4: Register router in `backend/main.py`**
+- [x] **Step 4: Register router in `backend/main.py`**
 
 Add import:
 ```python
@@ -912,7 +912,7 @@ Add:
 app.include_router(chat_router)
 ```
 
-- [ ] **Step 5: Run tests — expect PASS**
+- [x] **Step 5: Run tests — expect PASS**
 
 ```bash
 cd backend
@@ -921,7 +921,7 @@ pytest tests/test_api_chat.py -v
 
 Expected: All 6 tests PASS.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 cd backend
@@ -937,14 +937,14 @@ This task verifies the full stack works with a real LLM call using the seeded da
 
 **Prerequisite:** `anthropic-setup-auth` provider requires Claude CLI authentication (`claude` must be logged in). Alternatively, swap the seeded provider type to `anthropic-api-key` with a real API key.
 
-- [ ] **Step 1: Ensure DB is seeded**
+- [x] **Step 1: Ensure DB is seeded**
 
 ```bash
 cd backend
 python seed.py
 ```
 
-- [ ] **Step 2: Start server**
+- [x] **Step 2: Start server**
 
 ```bash
 cd backend
@@ -958,7 +958,7 @@ INFO: Application startup complete.
 ```
 No errors about graph compilation.
 
-- [ ] **Step 3: Create a session**
+- [x] **Step 3: Create a session**
 
 ```bash
 curl -s -X POST http://localhost:8000/api/sessions \
@@ -974,7 +974,7 @@ To get the EmailClassifier agent id:
 curl -s http://localhost:8000/api/agents | python -m json.tool
 ```
 
-- [ ] **Step 4: Send a chat message**
+- [x] **Step 4: Send a chat message**
 
 ```bash
 curl -s -X POST http://localhost:8000/api/chat \
@@ -988,7 +988,7 @@ Expected: A JSON response with:
 - `"response"` — non-empty string from the LLM
 - `"turn_count": 1`
 
-- [ ] **Step 5: Run full test suite — all passing**
+- [x] **Step 5: Run full test suite — all passing**
 
 ```bash
 cd backend
@@ -997,7 +997,7 @@ pytest -v --tb=short
 
 Expected: All tests PASS.
 
-- [ ] **Step 6: Final commit**
+- [x] **Step 6: Final commit**
 
 ```bash
 cd backend

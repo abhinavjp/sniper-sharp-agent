@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from db.database import init_db, get_db
 from api.system import router as system_router
+from api.providers import router as providers_router
 
 
 @asynccontextmanager
@@ -31,3 +32,4 @@ app.add_middleware(
 )
 
 app.include_router(system_router)
+app.include_router(providers_router)

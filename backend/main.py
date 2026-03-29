@@ -7,6 +7,7 @@ from db.database import init_db, get_db
 from api.system import router as system_router
 from api.providers import router as providers_router
 from api.skills import router as skills_router
+from api.agents import router as agents_router
 
 
 @asynccontextmanager
@@ -35,3 +36,4 @@ app.add_middleware(
 app.include_router(system_router)
 app.include_router(providers_router)
 app.include_router(skills_router)
+app.include_router(agents_router)

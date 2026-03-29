@@ -1,7 +1,6 @@
 from typing import Any
 
 from langgraph.graph import END, StateGraph
-from langgraph.graph.graph import CompiledGraph
 
 from db.models import Agent, RoutingRule
 from graph.classifier import build_classifier_node
@@ -27,7 +26,7 @@ def build_supervisor_graph(
     supervisor: Agent,
     specialists: list[Agent],
     routing_rules: list[RoutingRule],
-) -> CompiledGraph:
+) -> Any:
     """
     Build and compile the full supervisor LangGraph StateGraph.
 

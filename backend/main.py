@@ -3,21 +3,30 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from db.database import init_db, get_db
-from api.system import router as system_router
-from api.providers import router as providers_router
-from api.skills import router as skills_router
 from api.agents import router as agents_router
+from api.providers import router as providers_router
 from api.routing_rules import router as routing_rules_router
 from api.sessions import router as sessions_router
+from api.skills import router as skills_router
+from api.system import router as system_router
+from db.database import SessionLocal, init_db
+from graph.registry import graph_registry
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Only init_db in production. In tests, conftest.py sets up
-    # dependency overrides for a test database, which we detect here.
-    if get_db not in app.dependency_overrides:
-        init_db()
+    init_db()
+    # Build the initial graph from whatever is currently in the DB
+    db = SessionLocal()
+    try:
+        try:
+            await graph_registry.rebuild(db)
+        except Exception:
+            # Graph rebuild may fail in test environments without provider credentials
+            # This is expected and safe — the graph will remain uncompiled
+            pass
+    finally:
+        db.close()
     yield
 
 

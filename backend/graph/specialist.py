@@ -1,5 +1,6 @@
+from typing import Any
+
 from langchain_core.language_models import BaseChatModel
-from langgraph.graph.graph import CompiledGraph
 from langgraph.prebuilt import create_react_agent
 
 from db.models import Agent
@@ -8,7 +9,7 @@ from providers.factory import provider_factory
 from skills.registry import build_tools_for_agent
 
 
-def build_specialist_subgraph(agent: Agent) -> CompiledGraph:
+def build_specialist_subgraph(agent: Agent) -> Any:
     """
     Compile a ReAct agent subgraph for a specialist (non-supervisor) agent.
 
@@ -25,5 +26,5 @@ def build_specialist_subgraph(agent: Agent) -> CompiledGraph:
     return create_react_agent(
         model=llm,
         tools=tools,
-        state_modifier=system_prompt,
+        prompt=system_prompt,
     )

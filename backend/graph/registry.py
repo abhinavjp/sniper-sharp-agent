@@ -1,8 +1,6 @@
 import asyncio
 from typing import Any
 
-from langgraph.graph.graph import CompiledGraph
-
 from db.models import Agent, RoutingRule
 
 
@@ -19,7 +17,7 @@ class GraphRegistry:
     """
 
     def __init__(self) -> None:
-        self._graph: CompiledGraph | None = None
+        self._graph: Any | None = None
         self._lock = asyncio.Lock()
 
     async def rebuild(self, db: Any = None) -> None:
@@ -46,7 +44,7 @@ class GraphRegistry:
         async with self._lock:
             self._graph = build_supervisor_graph(supervisor, specialists, routing_rules)
 
-    async def get(self) -> CompiledGraph | None:
+    async def get(self) -> Any | None:
         """Return the compiled graph, or None if not yet built."""
         return self._graph
 

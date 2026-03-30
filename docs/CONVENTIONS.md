@@ -2,6 +2,7 @@
 
 Authoritative reference for all contributors (human and AI). Rules here override intuition.
 Both `CLAUDE.md` and `GEMINI.md` point here — keep all three in sync.
+For frontend UI styling and aesthetics, refer to `FRONTEND_DESIGN_CONVENTIONS.md`.
 
 ---
 

@@ -70,14 +70,14 @@ export default function ChatView() {
   const turnCount = messages.filter((m) => m.role === 'user').length;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3rem)] max-w-3xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-3rem)] max-w-4xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 shrink-0">
+      <div className="flex items-center justify-between mb-5 shrink-0 animate-fade-in-up">
         <div className="flex items-center gap-3">
           <select
             value={selectedAgentId}
             onChange={(e) => setSelectedAgentId(e.target.value)}
-            className="bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 shadow-sm transition-all"
           >
             {agents.length === 0 && (
               <option value="">No agents — run python seed.py first</option>
@@ -91,7 +91,7 @@ export default function ChatView() {
           <button
             onClick={() => { void handleNewSession(); }}
             disabled={!selectedAgentId}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium transition-colors disabled:opacity-40"
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 shadow-sm shadow-indigo-500/20 text-white text-sm font-medium transition-all disabled:opacity-40"
           >
             New Session
           </button>
@@ -104,11 +104,14 @@ export default function ChatView() {
       </div>
 
       {/* Thread */}
-      <div className="flex-1 overflow-y-auto bg-white/5 border border-white/10 rounded-2xl p-4 space-y-4 min-h-0">
+      <div 
+        className="flex-1 overflow-y-auto bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-4 sm:p-6 space-y-6 min-h-0 animate-fade-in-up shadow-sm dark:shadow-none"
+        style={{ animationDelay: '0.1s' }}
+      >
         {session === null && (
           <div className="h-full flex items-center justify-center text-slate-500 text-sm text-center p-8">
             Select an agent and press{' '}
-            <span className="mx-1 px-2 py-0.5 bg-white/10 rounded text-slate-400 font-mono text-xs">
+            <span className="mx-1 px-2.5 py-1 bg-slate-100 dark:bg-white/10 rounded-lg text-slate-600 dark:text-slate-300 font-medium text-xs border border-slate-200 dark:border-white/5 shadow-sm">
               New Session
             </span>{' '}
             to start chatting.
@@ -116,15 +119,15 @@ export default function ChatView() {
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in-up`} style={{ animationDelay: `${0.15 + (i % 5) * 0.05}s` }}>
             <div
-              className={`max-w-[78%] rounded-2xl px-4 py-3 border ${
+              className={`max-w-[85%] sm:max-w-[78%] rounded-2xl px-5 py-3.5 border shadow-sm ${
                 msg.role === 'user'
-                  ? 'bg-indigo-600/40 border-indigo-500/30'
-                  : 'bg-white/5 border-white/10'
+                  ? 'bg-indigo-600 border-indigo-500 text-white rounded-br-sm'
+                  : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 rounded-bl-sm'
               }`}
             >
-              <p className="text-slate-200 text-sm whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm whitespace-pre-wrap leading-relaxed">
                 {msg.content}
               </p>
               {msg.role === 'assistant' && msg.intent != null && msg.intent !== '' && (
@@ -137,9 +140,13 @@ export default function ChatView() {
         ))}
 
         {sending && (
-          <div className="flex justify-start">
-            <div className="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-              <span className="text-slate-500 text-sm">Thinking…</span>
+          <div className="flex justify-start animate-fade-in-up">
+            <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl rounded-bl-sm px-5 py-3.5 shadow-sm flex items-center gap-2">
+              <span className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-400 dark:bg-slate-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+              </span>
             </div>
           </div>
         )}
@@ -151,7 +158,7 @@ export default function ChatView() {
       )}
 
       {/* Input */}
-      <div className="mt-3 flex gap-2 shrink-0">
+      <div className="mt-4 flex gap-3 shrink-0 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -163,12 +170,12 @@ export default function ChatView() {
           }}
           disabled={session === null || sending}
           placeholder={session !== null ? 'Type a message… (Enter to send)' : 'Create a session first'}
-          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-40 transition-all"
+          className="flex-1 bg-white/80 dark:bg-white/5 shadow-sm border border-slate-200 dark:border-white/10 rounded-2xl px-5 py-3.5 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-40 transition-all backdrop-blur-md"
         />
         <button
           onClick={() => { void handleSend(); }}
           disabled={session === null || !input.trim() || sending}
-          className="px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-medium transition-all disabled:opacity-40 shrink-0"
+          className="px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 shadow-md shadow-indigo-500/20 text-white font-medium transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:hover:scale-100 shrink-0"
         >
           Send
         </button>

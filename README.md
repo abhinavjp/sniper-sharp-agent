@@ -14,7 +14,33 @@ A generic, plugin-driven AI agent framework. The backend exposes a LangGraph sup
 
 ---
 
-## Quick Start
+## Combined Start (Recommended)
+
+If you've already set up your backend virtual environment and installed UI dependencies, you can start both in one go:
+
+### Option 1: PowerShell Script (Windows)
+
+Launch both in separate, auto-focusing windows:
+
+```powershell
+.\start-dev.ps1
+```
+
+### Option 2: NPM (Cross-platform)
+
+Launch both in a single terminal session (logs will be interleaved):
+
+```bash
+# First time only (installs concurrently)
+npm install
+
+# Start both
+npm run dev
+```
+
+---
+
+## Quick Start (Manual)
 
 You need **two terminals** — one for the backend, one for the frontend.
 

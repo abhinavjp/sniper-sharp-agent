@@ -104,33 +104,33 @@ export default function ProvidersView() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <h2 className="text-2xl font-bold text-slate-200">Providers</h2>
+    <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
+      <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-200 tracking-tight">Providers</h2>
 
       {/* List */}
-      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+      <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-sm dark:shadow-none">
         {providers.length === 0 ? (
-          <p className="p-6 text-slate-500 text-sm text-center">No providers configured yet.</p>
+          <p className="p-8 text-slate-500 dark:text-slate-400 text-sm text-center">No providers configured yet.</p>
         ) : (
-          <ul className="divide-y divide-white/5">
+          <ul className="divide-y divide-slate-100 dark:divide-white/5">
             {providers.map((p) => (
-              <li key={p.id} className="flex items-center justify-between px-6 py-4">
+              <li key={p.id} className="flex items-center justify-between px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
                 <div>
-                  <p className="font-medium text-slate-200">{p.name}</p>
+                  <p className="font-semibold text-slate-900 dark:text-slate-200">{p.name}</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {PROVIDER_TYPE_LABELS[p.type]} · {p.model}
+                    {PROVIDER_TYPE_LABELS[p.type]} <span className="mx-1.5 opacity-50">·</span> {p.model}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleEdit(p)}
-                    className="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                    className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => { void handleDelete(p.id); }}
-                    className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
+                    className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
                   >
                     Delete
                   </button>
@@ -142,8 +142,8 @@ export default function ProvidersView() {
       </div>
 
       {/* Create form */}
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
-        <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-5">
+      <div className="bg-white/60 dark:bg-white/5 backdrop-blur-xl border border-slate-200/60 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm dark:shadow-none animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <h3 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-6">
           {editingId !== null ? 'Edit Provider' : 'Add Provider'}
         </h3>
         <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
@@ -155,7 +155,7 @@ export default function ProvidersView() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. My Anthropic"
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm"
               />
             </div>
             <div className="space-y-1.5">
@@ -165,7 +165,7 @@ export default function ProvidersView() {
                 value={form.model}
                 onChange={(e) => setForm({ ...form, model: e.target.value })}
                 placeholder="claude-opus-4-6"
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm"
               />
             </div>
           </div>
@@ -194,7 +194,7 @@ export default function ProvidersView() {
                 value={form.apiKey}
                 onChange={(e) => setForm({ ...form, apiKey: e.target.value })}
                 placeholder="sk-..."
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm"
               />
             </div>
           )}
@@ -208,13 +208,13 @@ export default function ProvidersView() {
                 value={form.baseUrl}
                 onChange={(e) => setForm({ ...form, baseUrl: e.target.value })}
                 placeholder="http://localhost:11434/v1"
-                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+                className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all shadow-sm"
               />
             </div>
           )}
 
           {NO_CREDENTIALS.includes(form.type) && (
-            <div className="p-4 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-200 text-sm flex items-start gap-3">
+            <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-200 text-sm flex items-start gap-3">
               <svg className="w-5 h-5 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -225,11 +225,11 @@ export default function ProvidersView() {
 
           {error !== null && <p className="text-rose-400 text-sm">{error}</p>}
 
-          <div className="flex gap-3">
+          <div className="flex gap-4 pt-2">
             <button
               type="submit"
               disabled={saving}
-              className="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
+              className="flex-1 py-3.5 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md shadow-indigo-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:hover:scale-100"
             >
               {saving ? 'Saving…' : editingId !== null ? 'Save Changes' : 'Add Provider'}
             </button>
@@ -237,7 +237,7 @@ export default function ProvidersView() {
               <button
                 type="button"
                 onClick={handleCancelEdit}
-                className="px-6 py-3 rounded-xl font-bold border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
+                className="px-8 py-3.5 rounded-xl font-bold border border-slate-200 dark:border-white/10 bg-white dark:bg-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-white/5 transition-all shadow-sm dark:shadow-none"
               >
                 Cancel
               </button>

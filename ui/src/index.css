@@ -1,18 +1,44 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color: #f9fafb;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --animate-fade-in-up: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
-#root {
-  width: 100%;
-  margin: 0 auto;
+@layer base {
+  body {
+    @apply m-0 min-w-[320px] min-h-screen font-sans antialiased;
+    @apply bg-slate-50 text-slate-900;
+  }
+  
+  .dark body {
+    /* Using a very deep blue/gray for the core background */
+    @apply bg-slate-950 text-slate-200;
+  }
+
+  ::selection {
+    @apply bg-indigo-500/30 text-indigo-900;
+  }
+
+  .dark ::selection {
+    @apply bg-indigo-500/30 text-indigo-200;
+  }
+  
+  #root {
+    @apply w-full mx-auto;
+  }
 }

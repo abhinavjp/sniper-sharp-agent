@@ -122,6 +122,15 @@
 - [ ] "Rebuild Graph" button — `POST /api/graph/rebuild`
 - [ ] Toast/notification on rebuild success or failure
 
+## Phase UI-5 — UI Polish and Aesthetics
+
+- [x] Establish `FRONTEND_DESIGN_CONVENTIONS.md` following modern, elegant, minimalistic principles
+- [x] Create `frontend-design` skill to ensure AI adherence to UI standards
+- [ ] Refactor and polish existing `ChatView`, `ProvidersView`, and `AgentsView` components using the new conventions
+- [ ] Ensure full dark and light mode compatibility with glassmorphism touches
+- [ ] Add staggered load animations and refined hover micro-interactions
+- [ ] Complete UI consistency review
+
 ---
 
 ## Phase 7 — Memory System

@@ -8,7 +8,9 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "dev": "tsx src/index.ts",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:ui\"",
+    "dev:backend": "cd backend && .\\venv\\Scripts\\activate && uvicorn main:app --reload --port 8000",
+    "dev:ui": "npm run dev --prefix ui",
     "server": "tsx src/server.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -23,6 +25,7 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.0.0",
+    "concurrently": "^9.1.2",
     "tsx": "^4.0.0",
     "typescript": "^5.4.0"
   }

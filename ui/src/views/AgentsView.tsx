@@ -135,6 +135,7 @@ export default function AgentsView() {
     try {
       await api.deleteAgent(id);
       if (editingId === id) handleCancel();
+      setExpandedAgentId((prev) => (prev === id ? null : prev));
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Delete failed');

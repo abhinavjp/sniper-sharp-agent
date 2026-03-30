@@ -109,11 +109,11 @@
 - [x] Skill attachment panel on AgentView: list attached skills, attach/detach buttons
 - [x] Supervisor badge on agent cards (visual distinction for is_supervisor=true)
 
-## Phase UI-3 — Skills + Routing Rules
+## Phase UI-3 — Skills + Routing Rules ✅
 
-- [ ] `SkillsView`: list all skills, create/edit form with Python code textarea (implementation field), delete
-- [ ] `RoutingRulesView`: list rules ordered by priority, create/edit form, delete
-- [ ] Priority drag-to-reorder (optional) or numeric priority input
+- [x] `SkillsView`: list all skills, create/edit form with Python code textarea (implementation field), delete
+- [x] `RoutingRulesView`: list rules ordered by priority, create/edit form, delete
+- [x] Priority drag-to-reorder (optional) or numeric priority input
 
 ## Phase UI-4 — System Dashboard + Graph Controls
 

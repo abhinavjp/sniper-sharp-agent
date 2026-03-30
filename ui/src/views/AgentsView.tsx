@@ -1,9 +1,298 @@
+import { useEffect, useState } from 'react';
+import { api } from '../api/client';
+import type { Agent, Provider } from '../api/client';
+
+interface FormState {
+  name: string;
+  persona: string;
+  rules: string;
+  provider_id: string;
+  is_supervisor: boolean;
+  memory_enabled: boolean;
+  config_hook_url: string;
+  config_hook_secret: string;
+}
+
+const EMPTY_FORM: FormState = {
+  name: '',
+  persona: '',
+  rules: '',
+  provider_id: '',
+  is_supervisor: false,
+  memory_enabled: false,
+  config_hook_url: '',
+  config_hook_secret: '',
+};
+
+const INPUT_CLS =
+  'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all';
+
+const TEXTAREA_CLS =
+  'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono text-sm resize-y';
+
 export default function AgentsView() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    void api.listAgents().then(setAgents).catch(() => setAgents([]));
+  };
+
+  useEffect(() => {
+    load();
+    void api.listProviders().then(setProviders).catch(() => setProviders([]));
+  }, []);
+
+  const handleEdit = (agent: Agent) => {
+    setEditingId(agent.id);
+    setForm({
+      name: agent.name,
+      persona: agent.persona,
+      rules: agent.rules ?? '',
+      provider_id: agent.provider_id,
+      is_supervisor: agent.is_supervisor,
+      memory_enabled: agent.memory_enabled,
+      config_hook_url: agent.config_hook_url ?? '',
+      config_hook_secret: agent.config_hook_secret ?? '',
+    });
+    setError(null);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+
+    const body = {
+      name: form.name,
+      persona: form.persona,
+      rules: form.rules || undefined,
+      provider_id: form.provider_id,
+      is_supervisor: form.is_supervisor,
+      memory_enabled: form.memory_enabled,
+      config_hook_url: form.config_hook_url || undefined,
+      config_hook_secret: form.config_hook_secret || undefined,
+    };
+
+    try {
+      if (editingId !== null) {
+        await api.updateAgent(editingId, body);
+        setEditingId(null);
+      } else {
+        await api.createAgent(body);
+      }
+      setForm(EMPTY_FORM);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete agent "${name}"?`)) return;
+    setError(null);
+    try {
+      await api.deleteAgent(id);
+      if (editingId === id) handleCancel();
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    }
+  };
+
+  const providerName = (id: string) =>
+    providers.find((p) => p.id === id)?.name ?? id;
+
+  const isEditing = editingId !== null;
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <h2 className="text-2xl font-bold text-slate-200 mb-6">Agents</h2>
-      <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-slate-400 text-center">
-        Coming in Phase UI-2
+    <div className="max-w-4xl mx-auto space-y-8">
+      <h2 className="text-2xl font-bold text-slate-200">Agents</h2>
+
+      {/* Agent list */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        {agents.length === 0 ? (
+          <p className="p-6 text-slate-500 text-sm text-center">
+            No agents yet. Run <code className="bg-white/10 px-1 rounded">python seed.py</code> or create one below.
+          </p>
+        ) : (
+          <ul className="divide-y divide-white/5">
+            {agents.map((agent) => (
+              <li key={agent.id} className="px-6 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-slate-200 truncate">{agent.name}</p>
+                      {agent.is_supervisor && (
+                        <span className="shrink-0 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                          Supervisor
+                        </span>
+                      )}
+                      {agent.memory_enabled && (
+                        <span className="shrink-0 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                          Memory
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                      Provider: {providerName(agent.provider_id)} · {agent.skills.length} skill{agent.skills.length !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-1">{agent.persona}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleEdit(agent)}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => { void handleDelete(agent.id, agent.name); }}
+                      className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {error !== null && <p className="text-rose-400 text-sm">{error}</p>}
+
+      {/* Create / Edit form */}
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+        <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-5">
+          {isEditing ? 'Edit Agent' : 'Add Agent'}
+        </h3>
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Name</label>
+              <input
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="e.g. EmailClassifier"
+                className={INPUT_CLS}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Provider</label>
+              <select
+                required
+                value={form.provider_id}
+                onChange={(e) => setForm({ ...form, provider_id: e.target.value })}
+                className={INPUT_CLS}
+              >
+                <option value="">— select a provider —</option>
+                {providers.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.model})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-400">Persona</label>
+            <textarea
+              required
+              rows={4}
+              value={form.persona}
+              onChange={(e) => setForm({ ...form, persona: e.target.value })}
+              placeholder="You are a helpful assistant that..."
+              className={TEXTAREA_CLS}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-400">Rules <span className="text-slate-600">(optional)</span></label>
+            <textarea
+              rows={3}
+              value={form.rules}
+              onChange={(e) => setForm({ ...form, rules: e.target.value })}
+              placeholder="Operating rules, constraints, and guidelines..."
+              className={TEXTAREA_CLS}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Config Hook URL <span className="text-slate-600">(optional)</span></label>
+              <input
+                type="url"
+                value={form.config_hook_url}
+                onChange={(e) => setForm({ ...form, config_hook_url: e.target.value })}
+                placeholder="https://example.com/persona-hook"
+                className={INPUT_CLS}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Hook Secret <span className="text-slate-600">(optional)</span></label>
+              <input
+                type="password"
+                value={form.config_hook_secret}
+                onChange={(e) => setForm({ ...form, config_hook_secret: e.target.value })}
+                placeholder="HMAC signing secret"
+                className={INPUT_CLS}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.is_supervisor}
+                onChange={(e) => setForm({ ...form, is_supervisor: e.target.checked })}
+                className="w-4 h-4 rounded accent-indigo-500"
+              />
+              <span className="text-sm text-slate-300">Supervisor</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.memory_enabled}
+                onChange={(e) => setForm({ ...form, memory_enabled: e.target.checked })}
+                className="w-4 h-4 rounded accent-indigo-500"
+              />
+              <span className="text-sm text-slate-300">Memory enabled</span>
+            </label>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Add Agent'}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-6 py-3 rounded-xl font-bold border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
       </div>
     </div>
   );

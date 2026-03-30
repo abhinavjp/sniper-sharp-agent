@@ -34,6 +34,7 @@ export interface Agent {
   provider_id: string;
   is_supervisor: boolean;
   memory_enabled: boolean;
+  memory_types: string[];
   config_hook_url: string | null;
   config_hook_secret: string | null;
   created_at: string;
@@ -147,6 +148,7 @@ export const api = {
     is_supervisor?: boolean;
     rules?: string;
     memory_enabled?: boolean;
+    memory_types?: string[];
     config_hook_url?: string;
     config_hook_secret?: string;
   }) => post<Agent>('/api/agents', body),
@@ -160,6 +162,7 @@ export const api = {
       is_supervisor: boolean;
       rules: string;
       memory_enabled: boolean;
+      memory_types: string[];
       config_hook_url: string;
       config_hook_secret: string;
     }>,

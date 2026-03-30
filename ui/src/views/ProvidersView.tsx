@@ -96,6 +96,7 @@ export default function ProvidersView() {
     setError(null);
     try {
       await api.deleteProvider(id);
+      if (editingId === id) handleCancelEdit();
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete provider');

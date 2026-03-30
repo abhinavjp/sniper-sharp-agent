@@ -102,12 +102,12 @@
 - [x] Persist `session_id` in component state; display `turn_count` and `intent` from response
 - [x] Sidebar polls `GET /api/health` every 10 s — shows live `graph_compiled` status dot
 
-## Phase UI-2 — Provider + Agent Management
+## Phase UI-2 — Provider + Agent Management ✅
 
-- [ ] `ProvidersView`: list all providers (GET /api/providers), create form, edit inline, delete
-- [ ] `AgentsView`: list agents (GET /api/agents), create/edit form with provider picker, delete
-- [ ] Skill attachment panel on AgentView: list attached skills, attach/detach buttons
-- [ ] Supervisor badge on agent cards (visual distinction for is_supervisor=true)
+- [x] `ProvidersView`: list all providers (GET /api/providers), create form, edit inline, delete
+- [x] `AgentsView`: list agents (GET /api/agents), create/edit form with provider picker, delete
+- [x] Skill attachment panel on AgentView: list attached skills, attach/detach buttons
+- [x] Supervisor badge on agent cards (visual distinction for is_supervisor=true)
 
 ## Phase UI-3 — Skills + Routing Rules
 

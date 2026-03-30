@@ -1,0 +1,753 @@
+# Phase UI-2: AgentsView + Provider Edit Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Build a fully functional AgentsView (list, create, edit, delete, skill attach/detach, supervisor badge) and add inline edit to the existing ProvidersView.
+
+**Architecture:** Replace the AgentsView stub with a single-file component that renders an agent list with expandable skill panels and a create/edit form that toggles between create and edit mode. ProvidersView gains an edit path by populating the existing form with selected provider data and switching the submit button to "Save Changes". No new routing — everything lives in the existing view files.
+
+**Tech Stack:** React 19, TypeScript 5.9 (`strict`, `verbatimModuleSyntax`), Tailwind CSS 4, existing `api` object from `ui/src/api/client.ts`. No additional packages needed.
+
+---
+
+## File Map
+
+| File | Action | Responsibility |
+|---|---|---|
+| `ui/src/api/client.ts` | Modify | Add `memory_types` to `Agent` interface; add it to `createAgent`/`updateAgent` call signatures |
+| `ui/src/views/AgentsView.tsx` | Replace stub | Agent list + supervisor badge + create/edit form + skill attachment panel |
+| `ui/src/views/ProvidersView.tsx` | Modify | Add edit-mode state; populate form on Edit click; submit updates via `PUT /api/providers/:id` |
+
+---
+
+## Task 1: Fix `Agent` type in `client.ts`
+
+The backend returns `memory_types: list[str]` on every agent response, but the frontend `Agent` interface is missing this field. TypeScript will silently discard it today; adding it enables the create/edit form to round-trip the value correctly.
+
+**Files:**
+- Modify: `ui/src/api/client.ts`
+
+- [ ] **Step 1: Add `memory_types` to the `Agent` interface**
+
+In `ui/src/api/client.ts`, locate the `Agent` interface (lines 29–41) and add the field:
+
+```typescript
+export interface Agent {
+  id: string;
+  name: string;
+  persona: string;
+  rules: string | null;
+  provider_id: string;
+  is_supervisor: boolean;
+  memory_enabled: boolean;
+  memory_types: string[];           // ← add this line
+  config_hook_url: string | null;
+  config_hook_secret: string | null;
+  created_at: string;
+  skills: Skill[];
+}
+```
+
+- [ ] **Step 2: Add `memory_types` to `createAgent` body type**
+
+Locate the `createAgent` entry in the `api` object and add the optional field:
+
+```typescript
+createAgent: (body: {
+  name: string;
+  persona: string;
+  provider_id: string;
+  is_supervisor?: boolean;
+  rules?: string;
+  memory_enabled?: boolean;
+  memory_types?: string[];
+  config_hook_url?: string;
+  config_hook_secret?: string;
+}) => post<Agent>('/api/agents', body),
+```
+
+- [ ] **Step 3: Add `memory_types` to `updateAgent` body type**
+
+Locate the `updateAgent` entry and add the optional field:
+
+```typescript
+updateAgent: (
+  id: string,
+  body: Partial<{
+    name: string;
+    persona: string;
+    provider_id: string;
+    is_supervisor: boolean;
+    rules: string;
+    memory_enabled: boolean;
+    memory_types: string[];
+    config_hook_url: string;
+    config_hook_secret: string;
+  }>,
+) => put<Agent>(`/api/agents/${id}`, body),
+```
+
+- [ ] **Step 4: Type-check**
+
+```bash
+cd D:/Projects/sniper-sharp-agent/ui && npx tsc --noEmit
+```
+
+Expected: zero errors.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd D:/Projects/sniper-sharp-agent
+git add ui/src/api/client.ts
+git commit -m "feat(ui): add memory_types to Agent type in API client"
+```
+
+---
+
+## Task 2: AgentsView — list + create/edit form + delete + supervisor badge
+
+Replace the 10-line stub with a full AgentsView. The component has two panels:
+- **Agent list** — cards with name, provider, supervisor badge, edit/delete controls
+- **Create / Edit form** — toggles between create mode and edit mode when the user clicks "Edit" on a card
+
+**Files:**
+- Replace: `ui/src/views/AgentsView.tsx`
+
+- [ ] **Step 1: Write the full AgentsView component**
+
+Replace the entire contents of `ui/src/views/AgentsView.tsx`:
+
+```tsx
+import { useEffect, useState } from 'react';
+import { api } from '../api/client';
+import type { Agent, Provider } from '../api/client';
+
+interface FormState {
+  name: string;
+  persona: string;
+  rules: string;
+  provider_id: string;
+  is_supervisor: boolean;
+  memory_enabled: boolean;
+  config_hook_url: string;
+  config_hook_secret: string;
+}
+
+const EMPTY_FORM: FormState = {
+  name: '',
+  persona: '',
+  rules: '',
+  provider_id: '',
+  is_supervisor: false,
+  memory_enabled: false,
+  config_hook_url: '',
+  config_hook_secret: '',
+};
+
+const INPUT_CLS =
+  'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all';
+
+const TEXTAREA_CLS =
+  'w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all font-mono text-sm resize-y';
+
+export default function AgentsView() {
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = () => {
+    void api.listAgents().then(setAgents).catch(() => setAgents([]));
+  };
+
+  useEffect(() => {
+    load();
+    void api.listProviders().then(setProviders).catch(() => setProviders([]));
+  }, []);
+
+  const handleEdit = (agent: Agent) => {
+    setEditingId(agent.id);
+    setForm({
+      name: agent.name,
+      persona: agent.persona,
+      rules: agent.rules ?? '',
+      provider_id: agent.provider_id,
+      is_supervisor: agent.is_supervisor,
+      memory_enabled: agent.memory_enabled,
+      config_hook_url: agent.config_hook_url ?? '',
+      config_hook_secret: agent.config_hook_secret ?? '',
+    });
+    setError(null);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setError(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setError(null);
+
+    const body = {
+      name: form.name,
+      persona: form.persona,
+      rules: form.rules || undefined,
+      provider_id: form.provider_id,
+      is_supervisor: form.is_supervisor,
+      memory_enabled: form.memory_enabled,
+      config_hook_url: form.config_hook_url || undefined,
+      config_hook_secret: form.config_hook_secret || undefined,
+    };
+
+    try {
+      if (editingId !== null) {
+        await api.updateAgent(editingId, body);
+        setEditingId(null);
+      } else {
+        await api.createAgent(body);
+      }
+      setForm(EMPTY_FORM);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Delete agent "${name}"?`)) return;
+    setError(null);
+    try {
+      await api.deleteAgent(id);
+      if (editingId === id) handleCancel();
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Delete failed');
+    }
+  };
+
+  const providerName = (id: string) =>
+    providers.find((p) => p.id === id)?.name ?? id;
+
+  const isEditing = editingId !== null;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8">
+      <h2 className="text-2xl font-bold text-slate-200">Agents</h2>
+
+      {/* Agent list */}
+      <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
+        {agents.length === 0 ? (
+          <p className="p-6 text-slate-500 text-sm text-center">
+            No agents yet. Run <code className="bg-white/10 px-1 rounded">python seed.py</code> or create one below.
+          </p>
+        ) : (
+          <ul className="divide-y divide-white/5">
+            {agents.map((agent) => (
+              <li key={agent.id} className="px-6 py-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-medium text-slate-200 truncate">{agent.name}</p>
+                      {agent.is_supervisor && (
+                        <span className="shrink-0 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                          Supervisor
+                        </span>
+                      )}
+                      {agent.memory_enabled && (
+                        <span className="shrink-0 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                          Memory
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-slate-500 mt-0.5 truncate">
+                      Provider: {providerName(agent.provider_id)} · {agent.skills.length} skill{agent.skills.length !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-slate-600 mt-1 line-clamp-1">{agent.persona}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => handleEdit(agent)}
+                      className="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => { void handleDelete(agent.id, agent.name); }}
+                      className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      {error !== null && <p className="text-rose-400 text-sm">{error}</p>}
+
+      {/* Create / Edit form */}
+      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
+        <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-5">
+          {isEditing ? 'Edit Agent' : 'Add Agent'}
+        </h3>
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Name</label>
+              <input
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="e.g. EmailClassifier"
+                className={INPUT_CLS}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Provider</label>
+              <select
+                required
+                value={form.provider_id}
+                onChange={(e) => setForm({ ...form, provider_id: e.target.value })}
+                className={INPUT_CLS}
+              >
+                <option value="">— select a provider —</option>
+                {providers.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name} ({p.model})</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-400">Persona</label>
+            <textarea
+              required
+              rows={4}
+              value={form.persona}
+              onChange={(e) => setForm({ ...form, persona: e.target.value })}
+              placeholder="You are a helpful assistant that..."
+              className={TEXTAREA_CLS}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-400">Rules <span className="text-slate-600">(optional)</span></label>
+            <textarea
+              rows={3}
+              value={form.rules}
+              onChange={(e) => setForm({ ...form, rules: e.target.value })}
+              placeholder="Operating rules, constraints, and guidelines..."
+              className={TEXTAREA_CLS}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Config Hook URL <span className="text-slate-600">(optional)</span></label>
+              <input
+                type="url"
+                value={form.config_hook_url}
+                onChange={(e) => setForm({ ...form, config_hook_url: e.target.value })}
+                placeholder="https://example.com/persona-hook"
+                className={INPUT_CLS}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-slate-400">Hook Secret <span className="text-slate-600">(optional)</span></label>
+              <input
+                type="password"
+                value={form.config_hook_secret}
+                onChange={(e) => setForm({ ...form, config_hook_secret: e.target.value })}
+                placeholder="HMAC signing secret"
+                className={INPUT_CLS}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.is_supervisor}
+                onChange={(e) => setForm({ ...form, is_supervisor: e.target.checked })}
+                className="w-4 h-4 rounded accent-indigo-500"
+              />
+              <span className="text-sm text-slate-300">Supervisor</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={form.memory_enabled}
+                onChange={(e) => setForm({ ...form, memory_enabled: e.target.checked })}
+                className="w-4 h-4 rounded accent-indigo-500"
+              />
+              <span className="text-sm text-slate-300">Memory enabled</span>
+            </label>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : isEditing ? 'Save Changes' : 'Add Agent'}
+            </button>
+            {isEditing && (
+              <button
+                type="button"
+                onClick={handleCancel}
+                className="px-6 py-3 rounded-xl font-bold border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+```
+
+- [ ] **Step 2: Type-check**
+
+```bash
+cd D:/Projects/sniper-sharp-agent/ui && npx tsc --noEmit
+```
+
+Expected: zero errors.
+
+- [ ] **Step 3: Commit**
+
+```bash
+cd D:/Projects/sniper-sharp-agent
+git add ui/src/views/AgentsView.tsx
+git commit -m "feat(ui): AgentsView — list, create, edit, delete with supervisor badge"
+```
+
+---
+
+## Task 3: Skill attachment panel inside AgentsView
+
+Add a collapsible skill panel to each agent card. When expanded it shows all skills currently attached (with detach buttons) and a dropdown to attach additional skills. The panel is appended to the existing agent list item — no new files needed.
+
+**Files:**
+- Modify: `ui/src/views/AgentsView.tsx`
+
+- [ ] **Step 1: Add skill state to AgentsView**
+
+At the top of the component, after the existing `useState` declarations, add:
+
+```tsx
+const [allSkills, setAllSkills] = useState<import('../api/client').Skill[]>([]);
+const [expandedAgentId, setExpandedAgentId] = useState<string | null>(null);
+const [skillBusy, setSkillBusy] = useState(false);
+```
+
+And in the `useEffect`, load all skills alongside agents and providers:
+
+```tsx
+useEffect(() => {
+  load();
+  void api.listProviders().then(setProviders).catch(() => setProviders([]));
+  void api.listSkills().then(setAllSkills).catch(() => setAllSkills([]));
+}, []);
+```
+
+- [ ] **Step 2: Add attach/detach handlers**
+
+Add these two functions inside the component (before the `return`):
+
+```tsx
+const handleAttach = async (agentId: string, skillId: string) => {
+  if (!skillId) return;
+  setSkillBusy(true);
+  try {
+    await api.attachSkill(agentId, skillId);
+    load();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Attach failed');
+  } finally {
+    setSkillBusy(false);
+  }
+};
+
+const handleDetach = async (agentId: string, skillId: string) => {
+  setSkillBusy(true);
+  try {
+    await api.detachSkill(agentId, skillId);
+    load();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Detach failed');
+  } finally {
+    setSkillBusy(false);
+  }
+};
+```
+
+- [ ] **Step 3: Add the skill panel to the agent list item**
+
+Inside the `agents.map(...)` loop, immediately after the existing `<div className="flex items-start justify-between ...">` div (but still within the `<li>`), add:
+
+```tsx
+{/* Skills toggle */}
+<div className="mt-3">
+  <button
+    onClick={() =>
+      setExpandedAgentId((prev) => (prev === agent.id ? null : agent.id))
+    }
+    className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+  >
+    {expandedAgentId === agent.id ? '▲ Hide skills' : '▼ Skills'}
+  </button>
+
+  {expandedAgentId === agent.id && (
+    <div className="mt-3 space-y-2">
+      {/* Attached skills */}
+      {agent.skills.length === 0 ? (
+        <p className="text-xs text-slate-600 italic">No skills attached.</p>
+      ) : (
+        <ul className="space-y-1">
+          {agent.skills.map((sk) => (
+            <li key={sk.id} className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-1.5">
+              <span className="text-xs text-slate-300">{sk.name}</span>
+              <button
+                disabled={skillBusy}
+                onClick={() => { void handleDetach(agent.id, sk.id); }}
+                className="text-xs text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded hover:bg-rose-500/10 transition-colors disabled:opacity-40"
+              >
+                Detach
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Attach dropdown */}
+      {(() => {
+        const attachable = allSkills.filter(
+          (sk) => !agent.skills.some((as) => as.id === sk.id),
+        );
+        if (attachable.length === 0) return null;
+        return (
+          <select
+            disabled={skillBusy}
+            defaultValue=""
+            onChange={(e) => {
+              if (e.target.value) void handleAttach(agent.id, e.target.value);
+              e.target.value = '';
+            }}
+            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-40 transition-all"
+          >
+            <option value="">+ Attach a skill…</option>
+            {attachable.map((sk) => (
+              <option key={sk.id} value={sk.id}>{sk.name}</option>
+            ))}
+          </select>
+        );
+      })()}
+    </div>
+  )}
+</div>
+```
+
+- [ ] **Step 4: Type-check**
+
+```bash
+cd D:/Projects/sniper-sharp-agent/ui && npx tsc --noEmit
+```
+
+Expected: zero errors.
+
+- [ ] **Step 5: Commit**
+
+```bash
+cd D:/Projects/sniper-sharp-agent
+git add ui/src/views/AgentsView.tsx
+git commit -m "feat(ui): AgentsView — skill attach/detach panel per agent"
+```
+
+---
+
+## Task 4: ProvidersView inline edit
+
+ProvidersView already handles create and delete. Add edit mode: clicking "Edit" on a provider card populates the existing form and switches the submit handler to `PUT /api/providers/:id`.
+
+**Files:**
+- Modify: `ui/src/views/ProvidersView.tsx`
+
+- [ ] **Step 1: Add `editingId` state**
+
+In `ProvidersView`, after the existing `useState` declarations, add:
+
+```tsx
+const [editingId, setEditingId] = useState<string | null>(null);
+```
+
+- [ ] **Step 2: Add `handleEdit` and `handleCancelEdit` functions**
+
+```tsx
+const handleEdit = (p: Provider) => {
+  setEditingId(p.id);
+  setForm({
+    name: p.name,
+    type: p.type,
+    model: p.model,
+    apiKey: p.credentials['api_key'] ?? '',
+    baseUrl: p.credentials['base_url'] ?? '',
+  });
+  setError(null);
+};
+
+const handleCancelEdit = () => {
+  setEditingId(null);
+  setForm(EMPTY_FORM);
+  setError(null);
+};
+```
+
+- [ ] **Step 3: Update `handleSubmit` to branch on `editingId`**
+
+Replace the existing `handleSubmit` body with:
+
+```tsx
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setSaving(true);
+  setError(null);
+  try {
+    const credentials: Record<string, string> = {};
+    if (NEEDS_API_KEY.includes(form.type)) credentials['api_key'] = form.apiKey;
+    if (NEEDS_URL.includes(form.type)) credentials['base_url'] = form.baseUrl;
+    if (editingId !== null) {
+      await api.updateProvider(editingId, {
+        name: form.name,
+        type: form.type,
+        model: form.model,
+        credentials,
+      });
+      setEditingId(null);
+    } else {
+      await api.createProvider({ name: form.name, type: form.type, model: form.model, credentials });
+    }
+    setForm(EMPTY_FORM);
+    load();
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Failed to save provider');
+  } finally {
+    setSaving(false);
+  }
+};
+```
+
+- [ ] **Step 4: Add "Edit" button to each provider list item**
+
+In the provider list's `<li>` element, add an Edit button alongside the existing Delete button:
+
+```tsx
+<li key={p.id} className="flex items-center justify-between px-6 py-4">
+  <div>
+    <p className="font-medium text-slate-200">{p.name}</p>
+    <p className="text-xs text-slate-500 mt-0.5">
+      {PROVIDER_TYPE_LABELS[p.type]} · {p.model}
+    </p>
+  </div>
+  <div className="flex items-center gap-2">
+    <button
+      onClick={() => handleEdit(p)}
+      className="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-500/10 transition-colors"
+    >
+      Edit
+    </button>
+    <button
+      onClick={() => { void handleDelete(p.id); }}
+      className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
+    >
+      Delete
+    </button>
+  </div>
+</li>
+```
+
+- [ ] **Step 5: Update form heading and submit button to reflect edit mode**
+
+Change the form heading `<h3>` to be dynamic:
+
+```tsx
+<h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-5">
+  {editingId !== null ? 'Edit Provider' : 'Add Provider'}
+</h3>
+```
+
+Change the submit button and add a Cancel button after it:
+
+```tsx
+<div className="flex gap-3">
+  <button
+    type="submit"
+    disabled={saving}
+    className="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
+  >
+    {saving ? 'Saving…' : editingId !== null ? 'Save Changes' : 'Add Provider'}
+  </button>
+  {editingId !== null && (
+    <button
+      type="button"
+      onClick={handleCancelEdit}
+      className="px-6 py-3 rounded-xl font-bold border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
+    >
+      Cancel
+    </button>
+  )}
+</div>
+```
+
+- [ ] **Step 6: Type-check**
+
+```bash
+cd D:/Projects/sniper-sharp-agent/ui && npx tsc --noEmit
+```
+
+Expected: zero errors.
+
+- [ ] **Step 7: Commit**
+
+```bash
+cd D:/Projects/sniper-sharp-agent
+git add ui/src/views/ProvidersView.tsx
+git commit -m "feat(ui): ProvidersView — add inline edit via PUT /api/providers/:id"
+```
+
+---
+
+## Self-Review
+
+**Spec coverage check:**
+
+| Roadmap item | Covered by |
+|---|---|
+| `ProvidersView`: list, create, **edit inline**, delete | Task 4 |
+| `AgentsView`: list, create/edit form, provider picker, delete | Task 2 |
+| Skill attachment panel: list attached, attach/detach | Task 3 |
+| Supervisor badge (visual distinction for `is_supervisor=true`) | Task 2 (indigo badge on card) |
+
+**Placeholder scan:** No TBDs, no "implement later", no "handle edge cases" without code. All code blocks complete.
+
+**Type consistency check:**
+- `Agent` interface extended in Task 1 — `memory_types: string[]` used only in form round-trip (not displayed)
+- `FormState` in AgentsView uses `string` for all text fields (empty string rather than null) — matches `.rules ?? ''` in `handleEdit`
+- `allSkills` typed as `import('../api/client').Skill[]` — same `Skill` type as `Agent.skills`
+- `editingId: string | null` used consistently in both ProvidersView and AgentsView — null means create mode
+
+All clear. No spec gaps.

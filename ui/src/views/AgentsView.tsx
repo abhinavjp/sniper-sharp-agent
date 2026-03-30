@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client';
-import type { Agent, Provider } from '../api/client';
+import type { Agent, Provider, Skill } from '../api/client';
 
 interface FormState {
   name: string;
@@ -37,6 +37,9 @@ export default function AgentsView() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allSkills, setAllSkills] = useState<Skill[]>([]);
+  const [expandedAgentId, setExpandedAgentId] = useState<string | null>(null);
+  const [skillBusy, setSkillBusy] = useState(false);
 
   const load = () => {
     void api.listAgents().then(setAgents).catch(() => setAgents([]));
@@ -45,6 +48,7 @@ export default function AgentsView() {
   useEffect(() => {
     load();
     void api.listProviders().then(setProviders).catch(() => setProviders([]));
+    void api.listSkills().then(setAllSkills).catch(() => setAllSkills([]));
   }, []);
 
   const handleEdit = (agent: Agent) => {
@@ -97,6 +101,31 @@ export default function AgentsView() {
       setError(err instanceof Error ? err.message : 'Save failed');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleAttach = async (agentId: string, skillId: string) => {
+    if (!skillId) return;
+    setSkillBusy(true);
+    try {
+      await api.attachSkill(agentId, skillId);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Attach failed');
+    } finally {
+      setSkillBusy(false);
+    }
+  };
+
+  const handleDetach = async (agentId: string, skillId: string) => {
+    setSkillBusy(true);
+    try {
+      await api.detachSkill(agentId, skillId);
+      load();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Detach failed');
+    } finally {
+      setSkillBusy(false);
     }
   };
 
@@ -165,6 +194,66 @@ export default function AgentsView() {
                       Delete
                     </button>
                   </div>
+                </div>
+
+                {/* Skills toggle */}
+                <div className="mt-3">
+                  <button
+                    onClick={() =>
+                      setExpandedAgentId((prev) => (prev === agent.id ? null : agent.id))
+                    }
+                    className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    {expandedAgentId === agent.id ? '▲ Hide skills' : '▼ Skills'}
+                  </button>
+
+                  {expandedAgentId === agent.id && (
+                    <div className="mt-3 space-y-2">
+                      {/* Attached skills */}
+                      {agent.skills.length === 0 ? (
+                        <p className="text-xs text-slate-600 italic">No skills attached.</p>
+                      ) : (
+                        <ul className="space-y-1">
+                          {agent.skills.map((sk) => (
+                            <li key={sk.id} className="flex items-center justify-between bg-white/5 rounded-lg px-3 py-1.5">
+                              <span className="text-xs text-slate-300">{sk.name}</span>
+                              <button
+                                disabled={skillBusy}
+                                onClick={() => { void handleDetach(agent.id, sk.id); }}
+                                className="text-xs text-rose-400 hover:text-rose-300 px-2 py-0.5 rounded hover:bg-rose-500/10 transition-colors disabled:opacity-40"
+                              >
+                                Detach
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Attach dropdown */}
+                      {(() => {
+                        const attachable = allSkills.filter(
+                          (sk) => !agent.skills.some((as) => as.id === sk.id),
+                        );
+                        if (attachable.length === 0) return null;
+                        return (
+                          <select
+                            disabled={skillBusy}
+                            defaultValue=""
+                            onChange={(e) => {
+                              if (e.target.value) void handleAttach(agent.id, e.target.value);
+                              e.target.value = '';
+                            }}
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-1.5 text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-40 transition-all"
+                          >
+                            <option value="">+ Attach a skill…</option>
+                            {attachable.map((sk) => (
+                              <option key={sk.id} value={sk.id}>{sk.name}</option>
+                            ))}
+                          </select>
+                        );
+                      })()}
+                    </div>
+                  )}
                 </div>
               </li>
             ))}

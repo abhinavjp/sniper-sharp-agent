@@ -37,12 +37,31 @@ export default function ProvidersView() {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const load = () => {
     void api.listProviders().then((list) => setProviders(list)).catch(() => setProviders([]));
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleEdit = (p: Provider) => {
+    setEditingId(p.id);
+    setForm({
+      name: p.name,
+      type: p.type,
+      model: p.model,
+      apiKey: p.credentials['api_key'] ?? '',
+      baseUrl: p.credentials['base_url'] ?? '',
+    });
+    setError(null);
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setForm(EMPTY_FORM);
+    setError(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,11 +71,21 @@ export default function ProvidersView() {
       const credentials: Record<string, string> = {};
       if (NEEDS_API_KEY.includes(form.type)) credentials['api_key'] = form.apiKey;
       if (NEEDS_URL.includes(form.type)) credentials['base_url'] = form.baseUrl;
-      await api.createProvider({ name: form.name, type: form.type, model: form.model, credentials });
+      if (editingId !== null) {
+        await api.updateProvider(editingId, {
+          name: form.name,
+          type: form.type,
+          model: form.model,
+          credentials,
+        });
+        setEditingId(null);
+      } else {
+        await api.createProvider({ name: form.name, type: form.type, model: form.model, credentials });
+      }
       setForm(EMPTY_FORM);
       load();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create provider');
+      setError(err instanceof Error ? err.message : 'Failed to save provider');
     } finally {
       setSaving(false);
     }
@@ -91,12 +120,20 @@ export default function ProvidersView() {
                     {PROVIDER_TYPE_LABELS[p.type]} · {p.model}
                   </p>
                 </div>
-                <button
-                  onClick={() => { void handleDelete(p.id); }}
-                  className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleEdit(p)}
+                    className="text-xs text-indigo-400 hover:text-indigo-300 px-3 py-1.5 rounded-lg hover:bg-indigo-500/10 transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { void handleDelete(p.id); }}
+                    className="text-xs text-rose-400 hover:text-rose-300 px-3 py-1.5 rounded-lg hover:bg-rose-500/10 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
@@ -106,7 +143,7 @@ export default function ProvidersView() {
       {/* Create form */}
       <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6">
         <h3 className="text-sm font-semibold text-indigo-300 uppercase tracking-wider mb-5">
-          Add Provider
+          {editingId !== null ? 'Edit Provider' : 'Add Provider'}
         </h3>
         <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
@@ -187,13 +224,24 @@ export default function ProvidersView() {
 
           {error !== null && <p className="text-rose-400 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
-          >
-            {saving ? 'Adding…' : 'Add Provider'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex-1 py-3 rounded-xl font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-lg shadow-blue-900/40 transition-all disabled:opacity-50"
+            >
+              {saving ? 'Saving…' : editingId !== null ? 'Save Changes' : 'Add Provider'}
+            </button>
+            {editingId !== null && (
+              <button
+                type="button"
+                onClick={handleCancelEdit}
+                className="px-6 py-3 rounded-xl font-bold border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

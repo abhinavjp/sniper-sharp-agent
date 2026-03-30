@@ -67,6 +67,11 @@ export default function RoutingRulesView() {
     setError(null);
     try {
       const priority = parseInt(form.priority, 10);
+      if (isNaN(priority)) {
+        setError('Priority must be a valid number');
+        setSaving(false);
+        return;
+      }
       if (editingId !== null) {
         await api.updateRoutingRule(editingId, {
           intent_label: form.intent_label,
@@ -260,7 +265,7 @@ export default function RoutingRulesView() {
               className={INPUT_CLS}
             >
               <option value="">— select a target agent —</option>
-              {specialists.map((a) => (
+              {(isEditing ? agents : specialists).map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.name}
                 </option>

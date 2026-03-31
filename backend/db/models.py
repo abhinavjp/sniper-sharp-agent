@@ -70,10 +70,10 @@ class Skill(Base):
     version: Mapped[str] = mapped_column(String, nullable=False, default="1.0.0")
     author: Mapped[str] = mapped_column(String, nullable=False, default="user")
     user_id: Mapped[str | None] = mapped_column(String, nullable=True)
-    allowed_tools: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    allowed_tools: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     user_invocable: Mapped[bool] = mapped_column(Boolean, default=False)
     disable_model_invocation: Mapped[bool] = mapped_column(Boolean, default=False)
-    context_requirements: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    context_requirements: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
     agents: Mapped[list["Agent"]] = relationship(
         "Agent", secondary="agent_skills", back_populates="skills"

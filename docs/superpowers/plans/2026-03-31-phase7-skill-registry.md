@@ -41,7 +41,7 @@
 **Files:**
 - Modify: `backend/db/models.py`
 
-- [ ] **Step 1: Add columns to `Skill` model**
+- [x] **Step 1: Add columns to `Skill` model**
 
 Open `backend/db/models.py`. Replace the `Skill` class body:
 
@@ -71,7 +71,7 @@ class Skill(Base):
     )
 ```
 
-- [ ] **Step 2: Add columns to `Agent` model**
+- [x] **Step 2: Add columns to `Agent` model**
 
 In the same file, add two new lines to the `Agent` class after `config_hook_secret`:
 
@@ -80,7 +80,7 @@ In the same file, add two new lines to the `Agent` class after `config_hook_secr
     skill_hook_secret: Mapped[str | None] = mapped_column(String, nullable=True)
 ```
 
-- [ ] **Step 3: Commit model changes**
+- [x] **Step 3: Commit model changes**
 
 ```bash
 git add backend/db/models.py
@@ -94,7 +94,7 @@ git commit -m "feat(phase7): add skill_type/version/author/user_id/metadata cols
 **Files:**
 - Create: `backend/db/migrations/versions/xxxx_skill_registry_fields.py`
 
-- [ ] **Step 1: Generate migration**
+- [x] **Step 1: Generate migration**
 
 ```bash
 cd backend
@@ -103,7 +103,7 @@ alembic revision --autogenerate -m "skill_registry_fields"
 
 Expected: a new file created under `backend/db/migrations/versions/` with a name like `<hash>_skill_registry_fields.py`.
 
-- [ ] **Step 2: Verify generated migration content**
+- [x] **Step 2: Verify generated migration content**
 
 Open the generated file. Confirm it contains `add_column` calls for each new column. If autogenerate missed any, add them manually. The upgrade function must contain:
 
@@ -123,7 +123,7 @@ def upgrade() -> None:
 
 And the downgrade must drop each column in reverse order.
 
-- [ ] **Step 3: Apply migration**
+- [x] **Step 3: Apply migration**
 
 ```bash
 cd backend
@@ -132,7 +132,7 @@ alembic upgrade head
 
 Expected: `Running upgrade <prev> -> <new>, skill_registry_fields`
 
-- [ ] **Step 4: Commit migration**
+- [x] **Step 4: Commit migration**
 
 ```bash
 git add backend/db/migrations/versions/
@@ -147,7 +147,7 @@ git commit -m "feat(phase7): alembic migration — skill registry fields on skil
 - Create: `backend/skills/loader.py`
 - Create: `backend/tests/test_skills_loader.py`
 
-- [ ] **Step 1: Write the three failing tests**
+- [x] **Step 1: Write the three failing tests**
 
 Create `backend/tests/test_skills_loader.py`:
 
@@ -246,7 +246,7 @@ def test_loader_skips_invalid_files(skills_dir, caplog):
     assert skills[0].name == "good-skill"
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 cd backend
@@ -255,7 +255,7 @@ pytest tests/test_skills_loader.py -v
 
 Expected: `ImportError` or `ModuleNotFoundError: No module named 'skills.loader'`
 
-- [ ] **Step 3: Create `backend/skills/loader.py`**
+- [x] **Step 3: Create `backend/skills/loader.py`**
 
 ```python
 import logging
@@ -358,7 +358,7 @@ def load_system_skills(skills_dir: Path) -> list[SystemSkill]:
     return results
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd backend
@@ -372,7 +372,7 @@ PASSED tests/test_skills_loader.py::test_loader_handles_missing_optional_fields
 PASSED tests/test_skills_loader.py::test_loader_skips_invalid_files
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/skills/loader.py backend/tests/test_skills_loader.py
@@ -396,7 +396,7 @@ pip show httpx
 
 If not installed: `pip install httpx` and add to `requirements.txt`.
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `backend/tests/test_skills_hook.py`:
 
@@ -513,7 +513,7 @@ async def test_hook_hmac_signature():
     assert sig_header == expected_sig
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 cd backend
@@ -535,7 +535,7 @@ Add `asyncio_mode = "auto"` to `pytest.ini` or `pyproject.toml` `[tool.pytest.in
 asyncio_mode = "auto"
 ```
 
-- [ ] **Step 3: Create `backend/skills/hook.py`**
+- [x] **Step 3: Create `backend/skills/hook.py`**
 
 ```python
 import hashlib
@@ -639,7 +639,7 @@ async def fetch_hook_skills(
     return results
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd backend
@@ -648,7 +648,7 @@ pytest tests/test_skills_hook.py -v
 
 Expected: 4 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/skills/hook.py backend/tests/test_skills_hook.py
@@ -663,7 +663,7 @@ git commit -m "feat(phase7): skills/hook.py — async HTTP hook with HMAC signin
 - Create: `backend/skills/resolver.py`
 - Create: `backend/tests/test_skills_resolver.py`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `backend/tests/test_skills_resolver.py`:
 
@@ -803,7 +803,7 @@ async def test_resolver_instruction_and_executable_coexist():
     assert types["instr-skill"] == "instruction"
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 cd backend
@@ -812,7 +812,7 @@ pytest tests/test_skills_resolver.py -v
 
 Expected: `ModuleNotFoundError: No module named 'skills.resolver'`
 
-- [ ] **Step 3: Create `backend/skills/resolver.py`**
+- [x] **Step 3: Create `backend/skills/resolver.py`**
 
 ```python
 import logging
@@ -940,7 +940,7 @@ async def resolve_skills(
     return results
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd backend
@@ -949,7 +949,7 @@ pytest tests/test_skills_resolver.py -v
 
 Expected: 4 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/skills/resolver.py backend/tests/test_skills_resolver.py
@@ -964,7 +964,7 @@ git commit -m "feat(phase7): skills/resolver.py — hook > user > system priorit
 - Modify: `backend/skills/registry.py`
 - Modify: `backend/tests/test_skills_registry.py`
 
-- [ ] **Step 1: Update existing tests and add two new ones**
+- [x] **Step 1: Update existing tests and add two new ones**
 
 Replace `backend/tests/test_skills_registry.py` entirely:
 
@@ -1077,7 +1077,7 @@ async def test_build_tools_mixed_types_split_correctly():
     assert instruction_skills[0].name == "instr-skill"
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 cd backend
@@ -1086,7 +1086,7 @@ pytest tests/test_skills_registry.py -v
 
 Expected: failures because `build_tools_for_agent` still has the old signature.
 
-- [ ] **Step 3: Replace `backend/skills/registry.py`**
+- [x] **Step 3: Replace `backend/skills/registry.py`**
 
 ```python
 import logging
@@ -1194,7 +1194,7 @@ async def build_tools_for_agent(
     return tools, instruction_skills
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd backend
@@ -1203,7 +1203,7 @@ pytest tests/test_skills_registry.py -v
 
 Expected: 6 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/skills/registry.py backend/tests/test_skills_registry.py
@@ -1217,7 +1217,7 @@ git commit -m "feat(phase7): skills/registry.py — returns (tools, instruction_
 **Files:**
 - Modify: `backend/graph/prompt.py`
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 Add this test to `backend/tests/test_graph_state.py` (or create `backend/tests/test_graph_prompt.py`):
 
@@ -1274,7 +1274,7 @@ def test_build_system_prompt_multiple_skills():
     assert "Do B." in prompt
 ```
 
-- [ ] **Step 2: Run tests to confirm they fail**
+- [x] **Step 2: Run tests to confirm they fail**
 
 ```bash
 cd backend
@@ -1283,7 +1283,7 @@ pytest tests/test_graph_prompt.py -v
 
 Expected: `TypeError` because `build_system_prompt` doesn't accept `instruction_skills`.
 
-- [ ] **Step 3: Update `backend/graph/prompt.py`**
+- [x] **Step 3: Update `backend/graph/prompt.py`**
 
 ```python
 from __future__ import annotations
@@ -1320,7 +1320,7 @@ def build_system_prompt(
     return "\n".join(sections)
 ```
 
-- [ ] **Step 4: Run tests to confirm they pass**
+- [x] **Step 4: Run tests to confirm they pass**
 
 ```bash
 cd backend
@@ -1329,7 +1329,7 @@ pytest tests/test_graph_prompt.py -v
 
 Expected: 3 tests pass.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/graph/prompt.py backend/tests/test_graph_prompt.py
@@ -1344,7 +1344,7 @@ git commit -m "feat(phase7): graph/prompt.py — append instruction_skills as na
 - Modify: `backend/graph/state.py`
 - Modify: `backend/api/chat.py`
 
-- [ ] **Step 1: Add `metadata` to `SupervisorState`**
+- [x] **Step 1: Add `metadata` to `SupervisorState`**
 
 Replace `backend/graph/state.py`:
 
@@ -1364,7 +1364,7 @@ class SupervisorState(TypedDict):
     metadata: dict | None # forwarded from chat request to hook; optional free-form context
 ```
 
-- [ ] **Step 2: Add `metadata` to `ChatRequest` and pass it in initial state**
+- [x] **Step 2: Add `metadata` to `ChatRequest` and pass it in initial state**
 
 In `backend/api/chat.py`, update `ChatRequest` and the initial state construction:
 
@@ -1395,7 +1395,7 @@ And update the initial state block in the `chat` handler:
     }
 ```
 
-- [ ] **Step 3: Verify existing chat tests still pass**
+- [x] **Step 3: Verify existing chat tests still pass**
 
 ```bash
 cd backend
@@ -1404,7 +1404,7 @@ pytest tests/test_api_chat.py -v
 
 Expected: all existing chat tests still pass (metadata is optional, defaults to None).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add backend/graph/state.py backend/api/chat.py
@@ -1421,7 +1421,7 @@ git commit -m "feat(phase7): add metadata field to SupervisorState and ChatReque
 
 This is the key architectural change: specialist becomes a lazy async node; registry caches `system_skills`.
 
-- [ ] **Step 1: Update `backend/graph/registry.py`**
+- [x] **Step 1: Update `backend/graph/registry.py`**
 
 ```python
 import asyncio
@@ -1494,7 +1494,7 @@ class GraphRegistry:
 graph_registry = GraphRegistry()
 ```
 
-- [ ] **Step 2: Update `backend/graph/specialist.py`**
+- [x] **Step 2: Update `backend/graph/specialist.py`**
 
 ```python
 from typing import Any, Callable
@@ -1555,7 +1555,7 @@ def build_specialist_node(agent: Agent) -> Callable:
     return specialist_node
 ```
 
-- [ ] **Step 3: Update `graph/supervisor.py` to use `build_specialist_node`**
+- [x] **Step 3: Update `graph/supervisor.py` to use `build_specialist_node`**
 
 In `backend/graph/supervisor.py`, change the import and node construction:
 
@@ -1572,7 +1572,7 @@ And in `build_supervisor_graph`, change:
         graph.add_edge(agent.id, END)
 ```
 
-- [ ] **Step 4: Run all existing tests**
+- [x] **Step 4: Run all existing tests**
 
 ```bash
 cd backend
@@ -1581,7 +1581,7 @@ pytest -v --tb=short
 
 Expected: all 58 existing tests still pass (graph tests may need mocking updates — see below). If `test_graph_state.py` fails because it tests the old `SupervisorState`, update it to include `metadata`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add backend/graph/specialist.py backend/graph/registry.py backend/graph/supervisor.py
@@ -1596,7 +1596,7 @@ git commit -m "feat(phase7): specialist becomes lazy async node; registry caches
 - Modify: `backend/api/skills.py`
 - Modify: `backend/api/agents.py`
 
-- [ ] **Step 1: Write failing API tests**
+- [x] **Step 1: Write failing API tests**
 
 Add to `backend/tests/test_api_skills.py` (append, do not replace existing tests):
 
@@ -1666,7 +1666,7 @@ def test_agent_skill_hook_fields(client):
     assert data["skill_hook_secret"] == "my-secret"
 ```
 
-- [ ] **Step 2: Run new tests to confirm they fail**
+- [x] **Step 2: Run new tests to confirm they fail**
 
 ```bash
 cd backend
@@ -1675,7 +1675,7 @@ pytest tests/test_api_skills.py::test_api_skill_metadata_fields tests/test_api_s
 
 Expected: failures because schemas don't have the new fields yet.
 
-- [ ] **Step 3: Update `backend/api/skills.py`**
+- [x] **Step 3: Update `backend/api/skills.py`**
 
 ```python
 from datetime import datetime
@@ -1827,7 +1827,7 @@ async def delete_skill(id: str, db: Session = Depends(get_db)):
     return Response(status_code=204)
 ```
 
-- [ ] **Step 4: Update `backend/api/agents.py` — add skill hook fields to `AgentOut` and `AgentUpdate`**
+- [x] **Step 4: Update `backend/api/agents.py` — add skill hook fields to `AgentOut` and `AgentUpdate`**
 
 Open `backend/api/agents.py`. Add to `AgentOut`:
 ```python
@@ -1841,7 +1841,7 @@ Add to `AgentUpdate`:
     skill_hook_secret: str | None = None
 ```
 
-- [ ] **Step 5: Run all failing tests**
+- [x] **Step 5: Run all failing tests**
 
 ```bash
 cd backend
@@ -1850,7 +1850,7 @@ pytest tests/test_api_skills.py tests/test_api_agents.py -v
 
 Expected: all tests pass including the new ones.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add backend/api/skills.py backend/api/agents.py
@@ -1863,7 +1863,7 @@ git commit -m "feat(phase7): API schemas — skill metadata fields, GET /api/ski
 
 **Files:** None (verification only)
 
-- [ ] **Step 1: Run the full test suite**
+- [x] **Step 1: Run the full test suite**
 
 ```bash
 cd backend
@@ -1872,14 +1872,14 @@ pytest -v --tb=short 2>&1 | tail -30
 
 Expected: all tests pass. The count should be ≥ 73 (58 existing + 15 new).
 
-- [ ] **Step 2: Fix any failures**
+- [x] **Step 2: Fix any failures**
 
 Common issues:
 - `test_graph_state.py` — if it asserts the exact keys of `SupervisorState`, add `metadata`.
 - `test_api_skills.py` existing tests — they now receive extra fields in the response; `assert` on specific fields rather than exact dict equality will pass.
 - Import cycles — if you see circular import, move the `from graph.registry import graph_registry` inside the function body (it is already done that way in `specialist.py`).
 
-- [ ] **Step 3: Run linting**
+- [x] **Step 3: Run linting**
 
 ```bash
 cd backend
@@ -1888,7 +1888,7 @@ python -m flake8 skills/ graph/ api/ --max-line-length=120 --extend-ignore=E501,
 
 Fix any `F401` (unused import) or `E302` (missing blank lines) warnings.
 
-- [ ] **Step 4: Final commit**
+- [x] **Step 4: Final commit**
 
 ```bash
 git add -A

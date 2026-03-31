@@ -101,3 +101,33 @@ def test_attach_skill_invalid_skill(client):
     provider = _create_provider(client)
     agent = _create_agent(client, provider["id"]).json()
     assert client.post(f"/api/agents/{agent['id']}/skills/bad-id").status_code == 404
+
+
+def test_agent_skill_hook_fields(client):
+    """Updating agent with skill_hook_url/secret returns them in GET response."""
+    # Create provider
+    prov = client.post("/api/providers", json={
+        "name": "hook-test-provider",
+        "type": "anthropic-api-key",
+        "credentials": {"api_key": "test"},
+        "model": "claude-3-haiku-20240307",
+    }).json()
+
+    # Create agent
+    agent = client.post("/api/agents", json={
+        "name": "hook-test-agent",
+        "persona": "I am a test agent.",
+        "provider_id": prov["id"],
+        "is_supervisor": False,
+    }).json()
+
+    # Update with hook fields
+    resp = client.put(f"/api/agents/{agent['id']}", json={
+        "skill_hook_url": "https://example.com/hook",
+        "skill_hook_secret": "my-secret",
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["skill_hook_url"] == "https://example.com/hook"
+    assert data["skill_hook_secret"] == "my-secret"
+

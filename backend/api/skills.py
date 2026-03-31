@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from pydantic import BaseModel, ConfigDict
@@ -17,6 +18,14 @@ class SkillCreate(BaseModel):
     description: str
     input_schema: dict
     implementation: str
+    skill_type: str = "executable"
+    version: str = "1.0.0"
+    author: str = "user"
+    user_id: str | None = None
+    allowed_tools: list[str] = []
+    user_invocable: bool = False
+    disable_model_invocation: bool = False
+    context_requirements: list[str] = []
 
 
 class SkillUpdate(BaseModel):
@@ -24,6 +33,14 @@ class SkillUpdate(BaseModel):
     description: str | None = None
     input_schema: dict | None = None
     implementation: str | None = None
+    skill_type: str | None = None
+    version: str | None = None
+    author: str | None = None
+    user_id: str | None = None
+    allowed_tools: list[str] | None = None
+    user_invocable: bool | None = None
+    disable_model_invocation: bool | None = None
+    context_requirements: list[str] | None = None
 
 
 class SkillOut(BaseModel):
@@ -33,7 +50,50 @@ class SkillOut(BaseModel):
     input_schema: dict
     implementation: str
     created_at: datetime
+    skill_type: str
+    version: str
+    author: str
+    user_id: str | None
+    allowed_tools: list[Any]
+    user_invocable: bool
+    disable_model_invocation: bool
+    context_requirements: list[Any]
     model_config = ConfigDict(from_attributes=True)
+
+
+class SystemSkillOut(BaseModel):
+    name: str
+    description: str
+    version: str
+    author: str
+    skill_type: str
+    allowed_tools: list[str]
+    user_invocable: bool
+    disable_model_invocation: bool
+    context_requirements: list[str]
+    body: str
+    source_path: str
+
+
+@router.get("/system", response_model=list[SystemSkillOut])
+def list_system_skills():
+    """Return system skills loaded from .agents/skills/ at last graph rebuild."""
+    return [
+        SystemSkillOut(
+            name=s.name,
+            description=s.description,
+            version=s.version,
+            author=s.author,
+            skill_type=s.skill_type,
+            allowed_tools=s.allowed_tools,
+            user_invocable=s.user_invocable,
+            disable_model_invocation=s.disable_model_invocation,
+            context_requirements=s.context_requirements,
+            body=s.body,
+            source_path=s.source_path,
+        )
+        for s in graph_registry.system_skills
+    ]
 
 
 @router.get("", response_model=list[SkillOut])

@@ -53,3 +53,37 @@ def test_delete_skill(client):
 def test_duplicate_name_rejected(client):
     _create_skill(client)
     assert _create_skill(client).status_code == 409
+
+
+def test_api_skill_metadata_fields(client):
+    """Creating a skill with new fields returns them in GET response."""
+    # Create a provider and agent first (required for seeded DB)
+    # Create skill with new fields
+    resp = client.post("/api/skills", json={
+        "name": "typed-skill",
+        "description": "A typed skill.",
+        "implementation": "return {'ok': True}",
+        "input_schema": {},
+        "skill_type": "executable",
+        "version": "2.0.0",
+        "author": "test-author",
+        "allowed_tools": ["bash"],
+        "user_invocable": True,
+    })
+    assert resp.status_code == 201
+    data = resp.json()
+    assert data["skill_type"] == "executable"
+    assert data["version"] == "2.0.0"
+    assert data["author"] == "test-author"
+    assert data["allowed_tools"] == ["bash"]
+    assert data["user_invocable"] is True
+    assert data["disable_model_invocation"] is False
+    assert data["context_requirements"] == []
+
+
+def test_api_skills_system_endpoint(client):
+    """GET /api/skills/system returns a list (may be empty in test env)."""
+    resp = client.get("/api/skills/system")
+    assert resp.status_code == 200
+    assert isinstance(resp.json(), list)
+

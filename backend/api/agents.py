@@ -34,6 +34,8 @@ class AgentUpdate(BaseModel):
     memory_types: list[str] | None = None
     config_hook_url: str | None = None
     config_hook_secret: str | None = None
+    skill_hook_url: str | None = None
+    skill_hook_secret: str | None = None
 
 
 class SkillSummary(BaseModel):
@@ -53,6 +55,8 @@ class AgentOut(BaseModel):
     memory_enabled: bool
     memory_types: list[str]
     config_hook_url: str | None
+    skill_hook_url: str | None
+    skill_hook_secret: str | None
     created_at: datetime
     skills: list[SkillSummary]
     model_config = ConfigDict(from_attributes=True)

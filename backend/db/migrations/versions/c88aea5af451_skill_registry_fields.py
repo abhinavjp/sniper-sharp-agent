@@ -9,7 +9,6 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.engine.reflection import Inspector
 
 
 # revision identifiers, used by Alembic.
@@ -22,7 +21,7 @@ depends_on: Union[str, Sequence[str], None] = None
 def _column_exists(table: str, column: str) -> bool:
     """Return True if column already exists in table (handles partial prior migrations)."""
     bind = op.get_bind()
-    inspector = Inspector.from_engine(bind)
+    inspector = sa.inspect(bind)
     return column in [c["name"] for c in inspector.get_columns(table)]
 
 
@@ -35,8 +34,16 @@ def upgrade() -> None:
     if not _column_exists('skills', 'user_id'):
         op.add_column('skills', sa.Column('user_id', sa.String(), nullable=True))
     op.add_column('skills', sa.Column('allowed_tools', sa.JSON(), nullable=False, server_default='[]'))
-    op.add_column('skills', sa.Column('user_invocable', sa.Boolean(), server_default='0'))
-    op.add_column('skills', sa.Column('disable_model_invocation', sa.Boolean(), server_default='0'))
+    if not _column_exists('skills', 'user_invocable'):
+        op.add_column('skills', sa.Column('user_invocable', sa.Boolean(), nullable=False, server_default='0'))
+    else:
+        with op.batch_alter_table('skills') as batch_op:
+            batch_op.alter_column('user_invocable', existing_type=sa.Boolean(), nullable=False, server_default='0')
+    if not _column_exists('skills', 'disable_model_invocation'):
+        op.add_column('skills', sa.Column('disable_model_invocation', sa.Boolean(), nullable=False, server_default='0'))
+    else:
+        with op.batch_alter_table('skills') as batch_op:
+            batch_op.alter_column('disable_model_invocation', existing_type=sa.Boolean(), nullable=False, server_default='0')
     op.add_column('skills', sa.Column('context_requirements', sa.JSON(), nullable=False, server_default='[]'))
     op.add_column('agents', sa.Column('skill_hook_url', sa.String(), nullable=True))
     op.add_column('agents', sa.Column('skill_hook_secret', sa.String(), nullable=True))
@@ -58,6 +65,3 @@ def downgrade() -> None:
     op.drop_column('skills', 'author')
     op.drop_column('skills', 'version')
     op.drop_column('skills', 'skill_type')
-    # Restore legacy tenant_id column
-    with op.batch_alter_table('skills') as batch_op:
-        batch_op.add_column(sa.Column('tenant_id', sa.VARCHAR(), nullable=True))

@@ -1,10 +1,16 @@
+import logging
 from typing import Any
 
 from langchain_core.tools import Tool
+from sqlalchemy.orm import Session
 
 from db.models import Agent
+from skills.loader import SystemSkill
+from skills.resolver import ResolvedSkill, resolve_skills
 
-# Allowlist of safe builtins available inside skill implementations.
+logger = logging.getLogger(__name__)
+
+# Allowlist of safe builtins available inside executable skill implementations.
 _SAFE_BUILTINS = {
     "len": len,
     "range": range,
@@ -54,16 +60,44 @@ def _make_executor(implementation: str):
     return safe_execute
 
 
-def build_tools_for_agent(agent: Agent) -> list[Tool]:
-    """Build a list of LangChain Tool objects from an agent's attached skills."""
-    tools = []
-    for skill in agent.skills:
-        executor = _make_executor(skill.implementation)
-        tools.append(
-            Tool(
-                name=skill.name,
-                description=skill.description,
-                func=executor,
+async def build_tools_for_agent(
+    agent: Agent,
+    user_id: str | None = None,
+    session_id: str | None = None,
+    metadata: dict | None = None,
+    system_skills: list[SystemSkill] | None = None,
+    db: Session | None = None,
+) -> tuple[list[Tool], list[ResolvedSkill]]:
+    """
+    Resolve all skills for this agent+user and split into:
+    - list[Tool]: LangChain tools built from skill_type='executable' skills
+    - list[ResolvedSkill]: skill_type='instruction' skills for system prompt injection
+
+    Calls resolver.resolve_skills() which merges hook > user DB > system sources.
+    """
+    resolved = await resolve_skills(
+        agent=agent,
+        user_id=user_id,
+        session_id=session_id,
+        metadata=metadata,
+        system_skills=system_skills or [],
+        db=db,
+    )
+
+    tools: list[Tool] = []
+    instruction_skills: list[ResolvedSkill] = []
+
+    for skill in resolved:
+        if skill.skill_type == "instruction":
+            instruction_skills.append(skill)
+        else:
+            executor = _make_executor(skill.implementation)
+            tools.append(
+                Tool(
+                    name=skill.name,
+                    description=skill.description,
+                    func=executor,
+                )
             )
-        )
-    return tools
+
+    return tools, instruction_skills

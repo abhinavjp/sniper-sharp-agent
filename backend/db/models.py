@@ -43,6 +43,8 @@ class Agent(Base):
     )
     config_hook_url: Mapped[str | None] = mapped_column(String, nullable=True)
     config_hook_secret: Mapped[str | None] = mapped_column(String, nullable=True)
+    skill_hook_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    skill_hook_secret: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     provider: Mapped["Provider"] = relationship("Provider", back_populates="agents")
@@ -62,6 +64,16 @@ class Skill(Base):
     input_schema: Mapped[dict] = mapped_column(JSON, nullable=False)
     implementation: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    # Phase 7 fields
+    skill_type: Mapped[str] = mapped_column(String, nullable=False, default="executable")
+    version: Mapped[str] = mapped_column(String, nullable=False, default="1.0.0")
+    author: Mapped[str] = mapped_column(String, nullable=False, default="user")
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    allowed_tools: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    user_invocable: Mapped[bool] = mapped_column(Boolean, default=False)
+    disable_model_invocation: Mapped[bool] = mapped_column(Boolean, default=False)
+    context_requirements: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
 
     agents: Mapped[list["Agent"]] = relationship(
         "Agent", secondary="agent_skills", back_populates="skills"

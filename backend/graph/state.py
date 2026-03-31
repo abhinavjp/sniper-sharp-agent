@@ -10,4 +10,4 @@ class SupervisorState(TypedDict):
     session_id: str
     intent: str | None    # set by classifier node; drives conditional routing
     response: str | None  # set by specialist subgraph; returned to caller
-    metadata: dict | None # forwarded from chat request to hook; optional free-form context
+    metadata: dict | None  # forwarded from chat request to hook; optional free-form context

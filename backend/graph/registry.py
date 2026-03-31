@@ -66,4 +66,3 @@ class GraphRegistry:
 
 # Module-level singleton shared across the application
 graph_registry = GraphRegistry()
-

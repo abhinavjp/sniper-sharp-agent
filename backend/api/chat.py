@@ -15,6 +15,7 @@ router = APIRouter(prefix="/api", tags=["chat"])
 class ChatRequest(BaseModel):
     session_id: str
     message: str
+    metadata: dict | None = None   # forwarded to skill hook
 
     @field_validator("message")
     @classmethod
@@ -60,6 +61,7 @@ async def chat(body: ChatRequest, db: DbSession = Depends(get_db)):
         "session_id": session.id,
         "intent": None,
         "response": None,
+        "metadata": body.metadata,
     }
 
     result: SupervisorState = await graph.ainvoke(initial_state)

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 
 from sqlalchemy.orm import Session
 
-from db.models import Agent
+from db.models import Agent, Skill
 from skills.hook import HookSkill, fetch_hook_skills
 from skills.loader import SystemSkill
 
@@ -41,12 +41,12 @@ def _from_hook(skill: HookSkill) -> ResolvedSkill:
     )
 
 
-def _from_db(skill: object) -> ResolvedSkill:
+def _from_db(skill: Skill) -> ResolvedSkill:
     return ResolvedSkill(
-        name=skill.name,  # type: ignore[attr-defined]
-        description=skill.description,  # type: ignore[attr-defined]
+        name=skill.name,
+        description=skill.description,
         skill_type=getattr(skill, "skill_type", "executable"),
-        implementation=skill.implementation,  # type: ignore[attr-defined]
+        implementation=skill.implementation,
         version=getattr(skill, "version", "1.0.0"),
         author=getattr(skill, "author", "user"),
         allowed_tools=list(getattr(skill, "allowed_tools", None) or []),
@@ -85,6 +85,9 @@ async def resolve_skills(
     Merge skills from three sources in priority order: hook > user DB > system.
     Skills with disable_model_invocation=True are excluded from the result.
     On name collision, the higher-priority source wins.
+
+    The `db` parameter is accepted for future direct-query extensions but is not
+    currently used — DB skills are accessed via the pre-loaded `agent.skills` relationship.
     """
     seen: set[str] = set()
     results: list[ResolvedSkill] = []

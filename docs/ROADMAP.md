@@ -115,12 +115,12 @@
 - [x] `RoutingRulesView`: list rules ordered by priority, create/edit form, delete
 - [x] Priority drag-to-reorder (optional) or numeric priority input
 
-## Phase UI-4 — System Dashboard + Graph Controls
+## Phase UI-4 — System Dashboard + Graph Controls ✅
 
-- [ ] `SystemView`: poll `GET /api/health` every 10 s — show `graph_compiled` indicator
-- [ ] Display `GET /api/graph/status` counts (agents, skills, routing rules)
-- [ ] "Rebuild Graph" button — `POST /api/graph/rebuild`
-- [ ] Toast/notification on rebuild success or failure
+- [x] `SystemView`: poll `GET /api/health` every 10 s — show `graph_compiled` indicator
+- [x] Display `GET /api/graph/status` counts (agents, skills, routing rules)
+- [x] "Rebuild Graph" button — `POST /api/graph/rebuild`
+- [x] Toast/notification on rebuild success or failure
 
 ## Phase UI-5 — UI Polish and Aesthetics
 
@@ -133,7 +133,16 @@
 
 ---
 
-## Phase 7 — Memory System
+## Phase 7 — "Skill-as-a-Package" Modular Architecture 
+
+- [ ] Standardise `SKILL.md` parser and update `skills/registry.py` to support hybrid (Filesystem + DB) resolution schemas (`skill://user > tenant > system`).
+- [ ] Implement DB migrations to support `tenant_id` and `user_id` columns in the `skills` table.
+- [ ] Migrate legacy DB-hardcoded core skills to purely physical `.agents/skills/{name}/SKILL.md` structures.
+- [ ] Implement `POST /api/skills/ingest` and `POST /api/skills/authorize` for external third-party app ecosystem.
+- [ ] Refactor `skills/executor.py` to route external script execution through a secure container/Wasm runtime sandbox.
+- [ ] UI: Update `SkillsView` to support external app skill ingestion flows, strictly maintaining the elegant, minimalistic design language defined in `FRONTEND_DESIGN_CONVENTIONS.md`. Ensure micro-animations and dark-mode glassmorphism are preserved.
+
+## Phase 8 — Memory System
 
 - [ ] Implement `memory/chroma.py` — ChromaDB embedded client wrapper
 - [ ] Implement `memory/manager.py` — `retrieve(agent_id, user_id, query, top_k)` and `save(memory_row)`
@@ -145,7 +154,7 @@
 - [ ] Test: memory-enabled agent remembers facts across turns and sessions
 - [ ] Produce: `docs/MEMORY_IMPLEMENTATION.md`
 
-## Phase 8 — Agent Seeding and Email Classification Pipeline
+## Phase 9 — Agent Seeding and Email Classification Pipeline
 
 - [ ] Seed DB: EmailClassifier supervisor with classify-email and parse-attachment skills
 - [ ] Seed DB: PayrollWorker specialist with process-starter, import-timesheet, create-task skills
@@ -155,7 +164,7 @@
 - [ ] Seed DB: UkPayrollAppAgent (memory_enabled: true) with rag-search, lookup-error-code skills
 - [ ] Test: app-question → AppAgent → retrieves memory → responds with context
 
-## Phase 9 — Config Hook (Phase 2)
+## Phase 10 — Config Hook (Phase 2)
 
 - [ ] Implement `hooks/config_hook.py` — POST to hook URL with agent metadata; HMAC-SHA256 signing
 - [ ] Wire hook call into system prompt assembly (between DB config and memory injection)
@@ -164,12 +173,11 @@
 - [ ] Test: agent with hook_url set receives overridden persona from external service
 - [ ] Produce: updated spec with hook integration test cases
 
-## Phase 10 — Integration and End-to-End Testing
+## Phase 11 — Integration and End-to-End Testing
 
 - [ ] Integration test: email classification pipeline (starter, timesheet, task branches)
 - [ ] Integration test: multi-user isolation (concurrent requests, no cross-user memory leakage)
 - [ ] Integration test: UkPayrollAppAgent memory accumulation across sessions
 - [ ] Integration test: config hook override replaces persona correctly
 - [ ] Integration test: graph hot-reload (add agent via API → next chat uses new agent)
-- [ ] Load test: concurrent users, parallel specialist invocations
 - [ ] Produce: `docs/TESTING.md`

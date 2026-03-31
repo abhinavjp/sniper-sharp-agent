@@ -8,7 +8,7 @@ A generic, plugin-driven agent framework. The base agent has no hardcoded name o
 
 **Planned plugins**: `email-classifier` (email triage orchestrator), `uk-payroll-processor` (UK Payroll API worker), `uk-payroll-app-agent` (app navigation assistant), `sniper-sharp-agent` (software architect).
 
-**Current status:** Phases 1–6, UI-1, UI-2, and UI-3 complete. FastAPI + LangGraph backend (`backend/`, 58 tests). React frontend (`ui/`) has working chat, full provider/agent/skill/routing-rule CRUD, sidebar nav, dark/light theme, and health badge. **Next backend: Phase 7 — Memory System. Next frontend: Phase UI-4 — SystemView dashboard.** See `docs/ROADMAP.md` for full status.
+**Current status:** Phases 1–6, UI-1 through UI-4 complete. FastAPI + LangGraph backend (`backend/`, 58 tests). React frontend (`ui/`) has working chat, full provider/agent/skill/routing-rule CRUD, system dashboard with graph rebuild, sidebar nav, dark/light theme, and health badge. **Next: Phase 7 — Memory System (backend) or Phase UI-5 — UI Polish.** See `docs/ROADMAP.md` for full status.
 
 ## Design Principles
 
@@ -40,7 +40,7 @@ ui/
 | Providers | 5 (CRUD) | ✅ List + create + edit inline + delete (`ProvidersView`) |
 | **Chat** | 1 (`POST /api/chat`) | ✅ Full chat UI (`ChatView`) |
 | Sessions | 2 (create / delete) | ✅ New Session button in ChatView |
-| System / health | 3 (health, status, rebuild) | 🟡 Health dot in sidebar; full view is Phase UI-4 |
+| System / health | 3 (health, status, rebuild) | ✅ Health dot in sidebar + full SystemView (`SystemView`) |
 | Agents | 7 (CRUD + skill attach/detach) | ✅ Full CRUD + skill panel + supervisor badge (`AgentsView`) |
 | Skills | 5 (CRUD) | ✅ Full CRUD + code textarea (`SkillsView`) |
 | Routing Rules | 5 (CRUD) | ✅ Full CRUD sorted by priority (`RoutingRulesView`) |

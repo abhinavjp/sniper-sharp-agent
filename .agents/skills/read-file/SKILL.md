@@ -1,9 +1,13 @@
 ---
 name: read-file
+version: "1.0.0"
 description: "Use this skill to read the contents of a file from the filesystem. Use when you need to inspect a local file's content — config files, skill definitions, memory entries, or any text-based file. Returns the raw file content as a string."
+author: system
+type: instruction
 allowed-tools:
   - read_file
-scope: core
+user-invocable: false
+disable-model-invocation: false
 ---
 
 ## read-file

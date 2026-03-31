@@ -1,9 +1,13 @@
 ---
 name: http-call
+version: "1.0.0"
 description: "Use this skill to make an outbound HTTP request to an external API or service. Use when a task requires calling a REST endpoint — fetching data, submitting a payload, or triggering an external action. Supports GET, POST, PUT, PATCH, DELETE. Returns the response status and body."
+author: system
+type: instruction
 allowed-tools:
   - web_fetch
-scope: core
+user-invocable: false
+disable-model-invocation: false
 ---
 
 ## http-call

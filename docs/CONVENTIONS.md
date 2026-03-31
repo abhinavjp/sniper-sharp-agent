@@ -99,29 +99,45 @@ src/               ← TypeScript runtime source
 - `entrypoint` must point to a file that exists within the plugin directory
 - No extra fields without updating the manifest schema
 
-### 4.2 `SKILL.md` (Skill Definition — YAML Frontmatter)
+### 4.2 `SKILL.md` (Modular Skill Package)
 
-**Required frontmatter fields:**
+Skills are organised as packages: a named directory containing an entrypoint manifest (`SKILL.md`), optional executable scripts (`scripts/`), optional reference documents (`references/`), and optional UI assets (`assets/`). This mirrors the Claude Code / Cowork skill package convention exactly.
+
+**Required `SKILL.md` frontmatter fields:**
 ```yaml
 ---
 name: skill-name-in-kebab-case
+version: "1.0.0"
 description: "Precise one-to-two sentence description of WHEN and WHY to use this skill. This is what the LLM sees during progressive disclosure."
+author: system                    # one of: system | {tenant_id} | user
+type: instruction                 # instruction = LLM body is the logic; executable = scripts/main.py runs in sandbox
 allowed-tools:
   - read_file
   - bash
+user-invocable: false             # true = exposed as /slash-command to the human user
+disable-model-invocation: false   # true = only callable by hooks/system triggers, never by LLM reasoning
+context-requirements:             # Optional — declare what must be injected at load time
+  - user_id
 ---
 ```
 
-**Optional frontmatter fields:**
-```yaml
-user-invocable: true          # Exposes as /slash-command to the human user
-disable-model-invocation: true # Only callable by hooks/triggers, not the LLM directly
-scope: core | plugin | user    # Informational; resolved at load time from directory position
+**Skill Package Folder Layout:**
+```
+{skill-name}/
+├── SKILL.md            # Entry point — YAML frontmatter + instruction body (required)
+├── scripts/            # Executable logic: main.py or index.js (only for type: executable)
+├── references/         # Domain docs (.md, .json) loaded on demand by the LLM
+└── assets/             # Optional UI components or icons (must follow FRONTEND_DESIGN_CONVENTIONS.md)
 ```
 
-- `name` must be globally unique within the resolved skill roster for a given session
-- `description` is the LLM's only signal during progressive disclosure — make it precise
-- `allowed-tools` must follow least-privilege: only list what the skill actually needs
+**Key rules:**
+- `name` must be globally unique within the resolved skill roster (`skill://user > tenant > system`) for a given session.
+- `description` is the LLM's only signal during progressive disclosure — make it precise and action-oriented.
+- `allowed-tools` must follow least-privilege: only list what the skill actually needs.
+- `scripts/` is **only present** for `type: executable` skills. Instruction-type skills have no scripts — the SKILL.md body IS the logic.
+- `user-invocable: true` exposes the skill as a `/slash-command` to the human. The slash command name is derived from the skill `name`.
+- `disable-model-invocation: true` reserves the skill for hook/trigger invocation only — the LLM cannot call it during reasoning.
+- **Frontend Assets**: Any UI templates in `assets/` must use minimal, semantic HTML classes compatible with the unified design language defined in `FRONTEND_DESIGN_CONVENTIONS.md`.
 
 ### 4.3 Sub-Agent Definition (`.agents/subagents/{name}.yaml`)
 

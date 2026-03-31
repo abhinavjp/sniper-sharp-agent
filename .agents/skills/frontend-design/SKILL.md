@@ -1,9 +1,14 @@
 ---
 name: frontend-design
+version: "1.0.0"
 description: "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when tasked with building web components, pages, or applications to ensure modern, elegant, minimalism. Generates creative, polished code that avoids generic AI aesthetics."
+author: system
+type: instruction
 allowed-tools:
   - read_file
   - bash-exec
+user-invocable: false
+disable-model-invocation: false
 ---
 
 This skill guides the creation of distinctive, production-grade frontend interfaces that strictly avoid generic "AI slop" aesthetics. All frontend code created must adhere to the high-quality benchmarks defined here and in `docs/FRONTEND_DESIGN_CONVENTIONS.md`.

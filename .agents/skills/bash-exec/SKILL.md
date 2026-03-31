@@ -1,10 +1,13 @@
 ---
 name: bash-exec
+version: "1.0.0"
 description: "Use this skill to execute a shell command on the host system. Use only when no higher-level skill covers the task — e.g. running a build script, checking a process, or interacting with the filesystem in a way read-file cannot. Restricted to non-interactive, single-line commands."
+author: system
+type: instruction
 allowed-tools:
   - bash
+user-invocable: false
 disable-model-invocation: false
-scope: core
 ---
 
 ## bash-exec

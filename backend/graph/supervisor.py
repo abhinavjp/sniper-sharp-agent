@@ -4,7 +4,7 @@ from langgraph.graph import END, StateGraph
 
 from db.models import Agent, RoutingRule
 from graph.classifier import build_classifier_node
-from graph.specialist import build_specialist_subgraph
+from graph.specialist import build_specialist_node
 from graph.state import SupervisorState
 
 
@@ -45,8 +45,8 @@ def build_supervisor_graph(
 
     # Specialist nodes (one per non-supervisor agent)
     for agent in specialists:
-        subgraph = build_specialist_subgraph(agent)
-        graph.add_node(agent.id, subgraph)
+        node_fn = build_specialist_node(agent)
+        graph.add_node(agent.id, node_fn)
         graph.add_edge(agent.id, END)
 
     # Conditional edge: classifier → specialist (or END as fallback)

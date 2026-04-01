@@ -55,6 +55,7 @@ class AgentOut(BaseModel):
     memory_enabled: bool
     memory_types: list[str]
     config_hook_url: str | None
+    config_hook_secret: str | None
     skill_hook_url: str | None
     skill_hook_secret: str | None
     created_at: datetime

@@ -103,6 +103,31 @@ def test_attach_skill_invalid_skill(client):
     assert client.post(f"/api/agents/{agent['id']}/skills/bad-id").status_code == 404
 
 
+def test_agent_config_hook_fields_in_response(client):
+    """AgentOut must include config_hook_url AND config_hook_secret."""
+    prov = client.post("/api/providers", json={
+        "name": "cfg-hook-provider",
+        "type": "anthropic-api-key",
+        "credentials": {"api_key": "test"},
+        "model": "claude-3-haiku-20240307",
+    }).json()
+
+    agent = client.post("/api/agents", json={
+        "name": "cfg-hook-agent",
+        "persona": "I test config hooks.",
+        "provider_id": prov["id"],
+        "config_hook_url": "https://example.com/config-hook",
+        "config_hook_secret": "cfg-secret-value",
+    }).json()
+
+    resp = client.get(f"/api/agents/{agent['id']}")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["config_hook_url"] == "https://example.com/config-hook"
+    assert "config_hook_secret" in data, "config_hook_secret must be returned in AgentOut"
+    assert data["config_hook_secret"] == "cfg-secret-value"
+
+
 def test_agent_skill_hook_fields(client):
     """Updating agent with skill_hook_url/secret returns them in GET response."""
     # Create provider

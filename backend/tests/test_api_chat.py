@@ -80,6 +80,35 @@ def test_chat_persists_history(client):
     assert resp.json()["turn_count"] == 2
 
 
+def test_chat_preserves_assistant_history(client):
+    """Turn 2 must receive both the human and assistant messages from turn 1."""
+    session_id = _setup(client)
+    captured_states = []
+
+    async def fake_invoke(state):
+        captured_states.append(state)
+        return {
+            "messages": state["messages"],
+            "intent": "FALLBACK",
+            "response": "I said hello back.",
+        }
+
+    mock_graph = AsyncMock()
+    mock_graph.ainvoke.side_effect = fake_invoke
+
+    with patch("api.chat.graph_registry") as mock_registry:
+        mock_registry.get = AsyncMock(return_value=mock_graph)
+        client.post("/api/chat", json={"session_id": session_id, "message": "Hello"})
+        client.post("/api/chat", json={"session_id": session_id, "message": "What did you say?"})
+
+    from langchain_core.messages import HumanMessage, AIMessage
+    second_messages = captured_states[1]["messages"]
+    assert any(isinstance(m, HumanMessage) and m.content == "Hello" for m in second_messages), \
+        "Turn-1 user message missing from turn-2 state"
+    assert any(isinstance(m, AIMessage) and m.content == "I said hello back." for m in second_messages), \
+        "Turn-1 assistant message missing from turn-2 state"
+
+
 def test_chat_graph_not_compiled(client):
     session_id = _setup(client)
 

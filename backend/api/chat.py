@@ -1,4 +1,4 @@
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, field_validator
@@ -52,7 +52,8 @@ async def chat(body: ChatRequest, db: DbSession = Depends(get_db)):
     for turn in session.history:
         if turn["role"] == "user":
             history_messages.append(HumanMessage(content=turn["content"]))
-        # assistant messages are included as AIMessage — LangGraph handles reconstruction
+        elif turn["role"] == "assistant":
+            history_messages.append(AIMessage(content=turn["content"]))
 
     # Run the graph
     initial_state: SupervisorState = {
@@ -86,7 +87,6 @@ async def chat(body: ChatRequest, db: DbSession = Depends(get_db)):
 
 def _extract_last_ai_message(messages: list) -> str:
     """Extract text from the last AI message in the message list."""
-    from langchain_core.messages import AIMessage
     for msg in reversed(messages):
         if isinstance(msg, AIMessage):
             return msg.content if isinstance(msg.content, str) else str(msg.content)

@@ -11,6 +11,8 @@ interface FormState {
   memory_enabled: boolean;
   config_hook_url: string;
   config_hook_secret: string;
+  skill_hook_url: string;
+  skill_hook_secret: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -22,6 +24,8 @@ const EMPTY_FORM: FormState = {
   memory_enabled: false,
   config_hook_url: '',
   config_hook_secret: '',
+  skill_hook_url: '',
+  skill_hook_secret: '',
 };
 
 const INPUT_CLS =
@@ -39,7 +43,7 @@ export default function AgentsView() {
   const [error, setError] = useState<string | null>(null);
   const [allSkills, setAllSkills] = useState<Skill[]>([]);
   const [expandedAgentId, setExpandedAgentId] = useState<string | null>(null);
-  const [skillBusy, setSkillBusy] = useState(false);
+  const [skillBusyAgentId, setSkillBusyAgentId] = useState<string | null>(null);
 
   const load = () => {
     void api.listAgents().then(setAgents).catch(() => setAgents([]));
@@ -62,6 +66,8 @@ export default function AgentsView() {
       memory_enabled: agent.memory_enabled,
       config_hook_url: agent.config_hook_url ?? '',
       config_hook_secret: agent.config_hook_secret ?? '',
+      skill_hook_url: agent.skill_hook_url ?? '',
+      skill_hook_secret: agent.skill_hook_secret ?? '',
     });
     setError(null);
   };
@@ -86,6 +92,8 @@ export default function AgentsView() {
       memory_enabled: form.memory_enabled,
       config_hook_url: form.config_hook_url || undefined,
       config_hook_secret: form.config_hook_secret || undefined,
+      skill_hook_url: form.skill_hook_url || undefined,
+      skill_hook_secret: form.skill_hook_secret || undefined,
     };
 
     try {
@@ -106,26 +114,26 @@ export default function AgentsView() {
 
   const handleAttach = async (agentId: string, skillId: string) => {
     if (!skillId) return;
-    setSkillBusy(true);
+    setSkillBusyAgentId(agentId);
     try {
       await api.attachSkill(agentId, skillId);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Attach failed');
     } finally {
-      setSkillBusy(false);
+      setSkillBusyAgentId(null);
     }
   };
 
   const handleDetach = async (agentId: string, skillId: string) => {
-    setSkillBusy(true);
+    setSkillBusyAgentId(agentId);
     try {
       await api.detachSkill(agentId, skillId);
       load();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Detach failed');
     } finally {
-      setSkillBusy(false);
+      setSkillBusyAgentId(null);
     }
   };
 
@@ -220,11 +228,11 @@ export default function AgentsView() {
                             <li key={sk.id} className="flex items-center justify-between bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-transparent rounded-lg px-3 py-2">
                               <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{sk.name}</span>
                               <button
-                                disabled={skillBusy}
+                                disabled={skillBusyAgentId === agent.id}
                                 onClick={() => { void handleDetach(agent.id, sk.id); }}
                                 className="text-xs font-medium text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-2 py-1 rounded hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors disabled:opacity-40"
                               >
-                                Detach
+                                {skillBusyAgentId === agent.id ? 'Removing…' : 'Detach'}
                               </button>
                             </li>
                           ))}
@@ -240,7 +248,7 @@ export default function AgentsView() {
                         return (
                           <div className="pt-2">
                             <select
-                              disabled={skillBusy}
+                              disabled={skillBusyAgentId === agent.id}
                               defaultValue=""
                               onChange={(e) => {
                                 if (e.target.value) void handleAttach(agent.id, e.target.value);
@@ -248,7 +256,9 @@ export default function AgentsView() {
                               }}
                               className="w-full bg-white dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-slate-700 dark:text-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/50 disabled:opacity-40 transition-all shadow-sm"
                             >
-                              <option value="">+ Attach a skill…</option>
+                              <option value="">
+                                {skillBusyAgentId === agent.id ? 'Attaching…' : '+ Attach a skill…'}
+                              </option>
                               {attachable.map((sk) => (
                                 <option key={sk.id} value={sk.id}>{sk.name}</option>
                               ))}
@@ -275,7 +285,7 @@ export default function AgentsView() {
         <form onSubmit={(e) => { void handleSubmit(e); }} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-400">Name</label>
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Name</label>
               <input
                 required
                 value={form.name}
@@ -285,7 +295,7 @@ export default function AgentsView() {
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-400">Provider</label>
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Provider</label>
               <select
                 required
                 value={form.provider_id}
@@ -301,7 +311,7 @@ export default function AgentsView() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs text-slate-400">Persona</label>
+            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Persona</label>
             <textarea
               required
               rows={4}
@@ -313,7 +323,7 @@ export default function AgentsView() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs text-slate-400">Rules <span className="text-slate-600">(optional)</span></label>
+            <label className="text-xs font-medium text-slate-500 dark:text-slate-400">Rules <span className="font-normal text-slate-400 dark:text-slate-600">(optional)</span></label>
             <textarea
               rows={3}
               value={form.rules}
@@ -325,21 +335,25 @@ export default function AgentsView() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-400">Config Hook URL <span className="text-slate-600">(optional)</span></label>
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Skill Hook URL <span className="font-normal text-slate-400 dark:text-slate-600">(optional)</span>
+              </label>
               <input
                 type="url"
-                value={form.config_hook_url}
-                onChange={(e) => setForm({ ...form, config_hook_url: e.target.value })}
-                placeholder="https://example.com/persona-hook"
+                value={form.skill_hook_url}
+                onChange={(e) => setForm({ ...form, skill_hook_url: e.target.value })}
+                placeholder="https://example.com/skills-hook"
                 className={INPUT_CLS}
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-slate-400">Hook Secret <span className="text-slate-600">(optional)</span></label>
+              <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                Skill Hook Secret <span className="font-normal text-slate-400 dark:text-slate-600">(optional)</span>
+              </label>
               <input
                 type="password"
-                value={form.config_hook_secret}
-                onChange={(e) => setForm({ ...form, config_hook_secret: e.target.value })}
+                value={form.skill_hook_secret}
+                onChange={(e) => setForm({ ...form, skill_hook_secret: e.target.value })}
                 placeholder="HMAC signing secret"
                 className={INPUT_CLS}
               />

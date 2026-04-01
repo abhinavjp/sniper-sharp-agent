@@ -37,8 +37,21 @@ export interface Agent {
   memory_types: string[];
   config_hook_url: string | null;
   config_hook_secret: string | null;
+  skill_hook_url: string | null;
+  skill_hook_secret: string | null;
   created_at: string;
   skills: Skill[];
+}
+
+export interface SystemSkill {
+  name: string;
+  description: string;
+  version: string;
+  author: string;
+  skill_type: string;
+  allowed_tools: string[];
+  user_invocable: boolean;
+  body: string;
 }
 
 export interface RoutingRule {
@@ -165,6 +178,8 @@ export const api = {
       memory_types: string[];
       config_hook_url: string;
       config_hook_secret: string;
+      skill_hook_url: string;
+      skill_hook_secret: string;
     }>,
   ) => put<Agent>(`/api/agents/${id}`, body),
   deleteAgent: (id: string) => del(`/api/agents/${id}`),
@@ -192,6 +207,7 @@ export const api = {
     }>,
   ) => put<Skill>(`/api/skills/${id}`, body),
   deleteSkill: (id: string) => del(`/api/skills/${id}`),
+  listSystemSkills: () => get<SystemSkill[]>('/api/skills/system'),
 
   // Routing Rules
   listRoutingRules: () => get<RoutingRule[]>('/api/routing-rules'),

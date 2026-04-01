@@ -6,7 +6,7 @@ from langgraph.graph.message import add_messages
 
 class SupervisorState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
-    user_id: str
+    user_id: str | None
     session_id: str
     intent: str | None    # set by classifier node; drives conditional routing
     response: str | None  # set by specialist subgraph; returned to caller

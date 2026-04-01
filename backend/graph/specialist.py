@@ -51,6 +51,15 @@ def build_specialist_node(agent: Agent) -> Callable:
             prompt=system_prompt,
         )
         result = await react_agent.ainvoke(state)
-        return result
+
+        # Explicitly extract and set `response` so callers never rely on message extraction
+        response_text = ""
+        from langchain_core.messages import AIMessage as _AIMessage
+        for msg in reversed(result.get("messages", [])):
+            if isinstance(msg, _AIMessage):
+                response_text = msg.content if isinstance(msg.content, str) else str(msg.content)
+                break
+
+        return {**result, "response": response_text}
 
     return specialist_node

@@ -109,6 +109,27 @@ def test_chat_preserves_assistant_history(client):
         "Turn-1 assistant message missing from turn-2 state"
 
 
+def test_chat_response_field_is_set_explicitly(client):
+    """The graph result must have `response` set; we must not rely solely on message extraction."""
+    session_id = _setup(client)
+
+    mock_graph = AsyncMock()
+    mock_graph.ainvoke.return_value = {
+        "messages": [],
+        "intent": "FALLBACK",
+        "response": "Explicit response from specialist",
+    }
+
+    with patch("api.chat.graph_registry") as mock_registry:
+        mock_registry.get = AsyncMock(return_value=mock_graph)
+        resp = client.post("/api/chat", json={
+            "session_id": session_id,
+            "message": "Test",
+        })
+
+    assert resp.json()["response"] == "Explicit response from specialist"
+
+
 def test_chat_graph_not_compiled(client):
     session_id = _setup(client)
 
